@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "755428474674",
+    "project_id": "fit-life-398908",
+    "storage_bucket": "fit-life-398908.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:755428474674:android:b78fd00f8ca3c48692212b",
+        "android_client_info": {
+          "package_name": "com.example.fit_life"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "755428474674-olm3ldgtqv0kig7lsed130kcela382i2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fit_life",
+            "certificate_hash": "24e131fd74653120a1b8e45f3873ffcb0cfae335"
+          }
+        },
+        {
+          "client_id": "755428474674-ppmtkb7q65lommrs57j76sbf02d9701i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA5l5hVe-Zw2zb878tkqzi1V7-Imw3LPE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "755428474674-ppmtkb7q65lommrs57j76sbf02d9701i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "755428474674-200fid7ape8lk1fl44m2u4hlf2s2ktk7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.fitLife"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

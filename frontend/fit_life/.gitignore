@@ -1,3 +1,7 @@
+# Added
+node_modules/
+GoogleService-Info.plist
+
 # Miscellaneous
 *.class
 *.log
