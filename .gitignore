@@ -1,2 +1,6 @@
 # My file type
-*.private
+.private
+private/
+
+# Sha key
+my-release-key.jks

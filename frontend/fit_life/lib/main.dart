@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  print(DefaultFirebaseOptions.currentPlatform);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -69,8 +71,8 @@ class _NavigationState extends State<Navigation> {
   void initState() {
     super.initState();
     pages = [
-      Home(),
-      Tips(),
+      const Home(),
+      const Tips(),
       Settings(updateLoginStatus: widget.updateLoginStatus),
     ];
   }
@@ -81,7 +83,6 @@ class _NavigationState extends State<Navigation> {
       color: Colors.amber[300],
       child: Scaffold(
           body: pages[index],
-          //body: pages[index],
           bottomNavigationBar: BottomNavBar(updateIndex: _updateIndex)),
     );
   }
@@ -94,14 +95,7 @@ class _NavigationState extends State<Navigation> {
 
 }
 
-class Home extends StatelessWidget {
-  const Home({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
 
 class Tips extends StatelessWidget {
   const Tips({super.key});
