@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
+import 'connection.dart' as server;
+import 'package:network_info_plus/network_info_plus.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -14,6 +16,8 @@ class _HomeState extends State<Home> {
 
     MyHealth myHealth = MyHealth();
     Future<int?> steps = myHealth.GetSteps();
+
+    server.Connection.test();
 
     return FutureBuilder<int?>(
       future: steps,
@@ -71,9 +75,15 @@ class MyHealth {
 
     print('Steps: $steps');
 
+    final info = NetworkInfo();
+
+    String? ip = await info.getWifiIP();
+    print(ip);
+
     return steps;
 
     
-
+//10.0.0.156
+//192.168.1.111
   }
 }
