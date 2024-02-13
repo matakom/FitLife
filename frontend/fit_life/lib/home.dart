@@ -1,23 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
 
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
 
     MyHealth myHealth = MyHealth();
-    myHealth.GetSteps();
+    Future<int?> steps = myHealth.GetSteps();
 
-    return const Placeholder();
+    return FutureBuilder<int?>(
+      future: steps,
+      builder: (context, snapshot){
+        if(snapshot.hasData){
+          return Container(
+            color: Colors.amber[300],
+            child: Center(
+              child: Text('Steps: ${snapshot.data}'),
+            ),
+          );
+        }
+        else if(snapshot.hasError){
+          return Container(
+            color: Colors.amber[300],
+            child: Center(
+              child: Text('Steps: ${snapshot.error}'),
+            ),
+          );
+        }
+        else{
+          return Container(
+            color: Colors.amber[300],
+            child: const Center(
+              child: Text('Loading steps'),
+            ),
+          );
+        }
+      },
+    );
   }
 }
 
 class MyHealth {
-
-  Future<void> GetSteps() async{
-
+  Future<int?> GetSteps() async {
     int? steps;
 
     HealthFactory health = HealthFactory();
@@ -27,6 +58,7 @@ class MyHealth {
     ];
 
     final now = DateTime.now();
+    final thisYear = DateTime(2024, 1, 16);
     final midnight = DateTime(now.year, now.month, now.day);
 
     var permissions = [
@@ -37,8 +69,11 @@ class MyHealth {
 
     steps = await health.getTotalStepsInInterval(midnight, now);
 
-    print(steps);
+    print('Steps: $steps');
+
+    return steps;
+
+    
 
   }
-
 }

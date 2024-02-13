@@ -82,8 +82,9 @@ class _NavigationState extends State<Navigation> {
     return Container(
       color: Colors.amber[300],
       child: Scaffold(
-          body: pages[index],
-          bottomNavigationBar: BottomNavBar(updateIndex: _updateIndex)),
+        body: pages[index],
+        bottomNavigationBar: BottomNavBar(updateIndex: _updateIndex),
+      ),
     );
   }
 
@@ -92,10 +93,7 @@ class _NavigationState extends State<Navigation> {
       index = newIndex;
     });
   }
-
 }
-
-
 
 class Tips extends StatelessWidget {
   const Tips({super.key});
