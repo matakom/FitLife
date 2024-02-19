@@ -1,69 +1,84 @@
-﻿using System.Net;
+﻿using Newtonsoft.Json;
+using System.Net;
 using System.Text;
 
 namespace Server_fitlife
 {
-    internal class Program
+    class Program
     {
-        static void Main()
+        public static HttpListener listener;
+        public static string url = "http://172.24.128.1:80/";
+        public static string homeUrl = "http://192.168.1.240:80/";
+        public static bool AtHome = true;
+
+        public static async Task HandleIncomingConnections()
         {
-            Listener listener = new Listener();
-            listener.Start();
-            while (true)
+            bool runServer = true;
+
+            while (runServer)
             {
-                Thread.Sleep(100);
-            }
-        }
-    }
+                HttpListenerContext context = await listener.GetContextAsync();
+                HttpListenerRequest request = context.Request;
+                HttpListenerResponse response = context.Response;
+                string textResponse = "";
 
-    class Listener
-    {
-        public int port = 80;
-        public string ipAddress = "192.168.1.111";
+                Console.WriteLine("-------------------------------------------------------------------");
+                Console.WriteLine(request.HttpMethod);
+                Console.WriteLine(request.Url.AbsolutePath);
+                Console.WriteLine(request.Url.Query);
 
-        private HttpListener _listener;
+                var queryParams = System.Web.HttpUtility.ParseQueryString(request.Url.Query);
 
-        public void Start()
-        {
-            Console.WriteLine("Start");
-            _listener = new HttpListener();
-            _listener.Prefixes.Add($"http://{ipAddress}:{port}/");
-            _listener.Start();
-            Receive();
-        }
+                switch (request.Url.AbsolutePath)
+                {
+                    case "/newKnownActivity":
+                        string body = StreamToString(request.InputStream);
+                        Console.WriteLine(body);
+                        textResponse = "understood";
+                        break;
+                    case "/newAnonymousActivity":
+                        body = StreamToString(request.InputStream);
+                        Console.WriteLine(body);
+                        textResponse = "I do not know this one...";
+                        break;
+                }
 
-        public void Stop()
-        {
-            Console.WriteLine("Stop");
-            _listener.Stop();
-        }
+                textResponse += " - " + queryParams["user"];
 
-        private void Receive()
-        {
-            Console.WriteLine("Receive");
-            _listener.BeginGetContext(new AsyncCallback(ListenerCallback), _listener);
-        }
+                byte[] data = Encoding.UTF8.GetBytes(textResponse);
+                response.ContentType = "text/plain";
+                response.ContentEncoding = Encoding.UTF8;
+                response.ContentLength64 = data.LongLength;
 
-        private void ListenerCallback(IAsyncResult result)
-        {
-            Console.WriteLine("Callback");
-            if (_listener.IsListening)
-            {
-                var context = _listener.EndGetContext(result);
-                var request = context.Request;
-
-                Console.WriteLine($"{request.Url}");
-
-
-                var response = context.Response;
-                response.StatusCode = 200;
-                byte[] data = Encoding.UTF8.GetBytes("ok");
-                response.OutputStream.Write(data, 0, data.Length);
+                await response.OutputStream.WriteAsync(data, 0, data.Length);
                 response.Close();
-
-                Receive();
             }
         }
-    }
 
+        static void Main(string[] args)
+        {
+            if(AtHome)
+            {
+                url = homeUrl;
+            }
+            listener = new HttpListener();
+            listener.Prefixes.Add(url);
+            listener.Start();
+            Console.WriteLine("Listening for connections on {0}", url);
+
+            Task listenTask = HandleIncomingConnections();
+            listenTask.GetAwaiter().GetResult();
+
+            listener.Close();
+        }
+
+        public static string StreamToString(Stream stream)
+        {
+            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+    }
 }
