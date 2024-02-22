@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Text;
 
@@ -15,6 +16,13 @@ namespace Server_fitlife
         {
             bool runServer = true;
 
+            bool success = await Database.StartDatabase();
+            
+            if(!success)
+            {
+                throw new Exception("Database connection start error");
+            }
+
             while (runServer)
             {
                 HttpListenerContext context = await listener.GetContextAsync();
@@ -25,25 +33,28 @@ namespace Server_fitlife
                 Console.WriteLine("-------------------------------------------------------------------");
                 Console.WriteLine(request.HttpMethod);
                 Console.WriteLine(request.Url.AbsolutePath);
-                Console.WriteLine(request.Url.Query);
 
-                var queryParams = System.Web.HttpUtility.ParseQueryString(request.Url.Query);
-
+                string body = StreamToString(request.InputStream);
+                JObject json = JsonConvert.DeserializeObject<dynamic>(body);
+                
                 switch (request.Url.AbsolutePath)
                 {
+                    case "/login":
+                        
+                        Database.UserLogin(json["mail"].ToString(), json["firstName"].ToString(), json["lastName"].ToString());
+
+                        break;
                     case "/newKnownActivity":
-                        string body = StreamToString(request.InputStream);
                         Console.WriteLine(body);
                         textResponse = "understood";
                         break;
                     case "/newAnonymousActivity":
-                        body = StreamToString(request.InputStream);
                         Console.WriteLine(body);
                         textResponse = "I do not know this one...";
                         break;
                 }
 
-                textResponse += " - " + queryParams["user"];
+
 
                 byte[] data = Encoding.UTF8.GetBytes(textResponse);
                 response.ContentType = "text/plain";
@@ -61,6 +72,7 @@ namespace Server_fitlife
             {
                 url = homeUrl;
             }
+            
             listener = new HttpListener();
             listener.Prefixes.Add(url);
             listener.Start();

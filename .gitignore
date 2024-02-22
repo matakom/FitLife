@@ -1,6 +1,7 @@
 # My file type
 .private
 private/
+.env
 
 # Sha key
 my-release-key.jks
