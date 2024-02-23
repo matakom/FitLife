@@ -31,8 +31,6 @@ namespace Server_fitlife
                 string textResponse = "";
 
                 Console.WriteLine("-------------------------------------------------------------------");
-                Console.WriteLine(request.HttpMethod);
-                Console.WriteLine(request.Url.AbsolutePath);
 
                 string body = StreamToString(request.InputStream);
                 JObject json = JsonConvert.DeserializeObject<dynamic>(body);
@@ -40,17 +38,16 @@ namespace Server_fitlife
                 switch (request.Url.AbsolutePath)
                 {
                     case "/login":
-                        
+                        await Console.Out.WriteLineAsync("Login");
                         Database.UserLogin(json["mail"].ToString(), json["firstName"].ToString(), json["lastName"].ToString());
-
                         break;
                     case "/newKnownActivity":
-                        Console.WriteLine(body);
-                        textResponse = "understood";
+                        await Console.Out.WriteLineAsync("Known Activity");
+                        KnownActivity(json);
                         break;
                     case "/newAnonymousActivity":
-                        Console.WriteLine(body);
-                        textResponse = "I do not know this one...";
+                        await Console.Out.WriteLineAsync("Anonymous Activity");
+                        AnonymousActivity(json);
                         break;
                 }
 
@@ -66,6 +63,27 @@ namespace Server_fitlife
             }
         }
 
+     
+        static void AnonymousActivity(JObject json)
+        {
+            DateTime start = Convert.ToDateTime(json["startTime"]);
+            DateTime end = Convert.ToDateTime(json["endTime"]);
+            string gmail = json["user"].ToString() ?? throw new Exception("Property is null, which it should not be");
+            string activity = json["activity"].ToString() ?? throw new Exception("Property is null, which it should not be");
+
+            Database.NewAnonymousActivity(gmail, activity, start, end);
+        }
+        static void KnownActivity(JObject json)
+        {
+            if ((json["activity"].ToString() ?? throw new Exception("Property is null, which it should not be")) == "steps")
+            {
+                int count = Convert.ToInt16(json["count"]);
+                DateTime start = Convert.ToDateTime(json["startTime"]);
+                DateTime end = Convert.ToDateTime(json["endTime"]);
+                string gmail = json["user"].ToString() ?? throw new Exception("Property is null, which it should not be");
+                Database.NewSteps(gmail, count, start, end);
+            }
+        }
         static void Main(string[] args)
         {
             if(AtHome)
@@ -83,7 +101,6 @@ namespace Server_fitlife
 
             listener.Close();
         }
-
         public static string StreamToString(Stream stream)
         {
             using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
@@ -91,6 +108,5 @@ namespace Server_fitlife
                 return reader.ReadToEnd();
             }
         }
-
     }
 }
