@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 import 'connection.dart' as server;
-import 'package:network_info_plus/network_info_plus.dart';
+import 'package:flutter_health_connect/flutter_health_connect.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,7 +15,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
 
     MyHealth myHealth = MyHealth();
-    Future<int?> steps = myHealth.GetSteps();
+    Future<int?> steps = myHealth.getSteps();
 
     server.Connection.test();
 
@@ -52,17 +52,16 @@ class _HomeState extends State<Home> {
 }
 
 class MyHealth {
-  Future<int?> GetSteps() async {
+  Future<int?> getSteps() async {
     int? steps;
 
-    HealthFactory health = HealthFactory();
+    HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
 
     var types = [
       HealthDataType.STEPS,
     ];
 
     final now = DateTime.now();
-    final thisYear = DateTime(2024, 1, 16);
     final midnight = DateTime(now.year, now.month, now.day);
 
     var permissions = [
@@ -75,15 +74,8 @@ class MyHealth {
 
     print('Steps: $steps');
 
-    final info = NetworkInfo();
-
-    String? ip = await info.getWifiIP();
-    print(ip);
-
     return steps;
 
     
-//10.0.0.156
-//192.168.1.111
   }
 }

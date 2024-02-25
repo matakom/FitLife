@@ -41,8 +41,8 @@ namespace Server_fitlife
             {
                 cmd.Parameters.AddWithValue("user_id", userId);
                 cmd.Parameters.AddWithValue("activity", "steps");
-                cmd.Parameters.AddWithValue("start_time", DateTime.Now);
-                cmd.Parameters.AddWithValue("end_time", DateTime.Now.AddDays(2));
+                cmd.Parameters.AddWithValue("start_time", start);
+                cmd.Parameters.AddWithValue("end_time", end);
                 cmd.Parameters.AddWithValue("count", count);
                 await cmd.ExecuteNonQueryAsync();
             }
@@ -61,16 +61,15 @@ namespace Server_fitlife
                 await cmd.ExecuteNonQueryAsync();
             }
         }
-        public static async void UserLogin(string gmail, string firstName, string lastName)
+        public static async void UserLogin(string gmail, string name)
         {
-            await using (var cmd = new NpgsqlCommand("INSERT INTO users (gmail, first_name, last_name, registration_date, last_login_date) " +
-                "VALUES (@gmail, @firstName, @lastName, @registrationDate, @lastLoginDate)" +
+            await using (var cmd = new NpgsqlCommand("INSERT INTO users (gmail, name, registration_date, last_login_date) " +
+                "VALUES (@gmail, @name, @registrationDate, @lastLoginDate)" +
                 "ON CONFLICT (gmail)" +
                 "DO UPDATE SET last_login_date = @lastLoginDate", connection))
             {
                 cmd.Parameters.AddWithValue("gmail", gmail);
-                cmd.Parameters.AddWithValue("firstName", firstName);
-                cmd.Parameters.AddWithValue("lastName", lastName);
+                cmd.Parameters.AddWithValue("name", name);
                 cmd.Parameters.AddWithValue("registrationDate", DateTime.Now);
                 cmd.Parameters.AddWithValue("lastLoginDate", DateTime.Now);
                 await cmd.ExecuteNonQueryAsync();

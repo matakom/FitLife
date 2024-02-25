@@ -6,7 +6,6 @@ import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  print(DefaultFirebaseOptions.currentPlatform);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -234,14 +233,3 @@ final ButtonStyle amberButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.amber[800],
 );
 
-DateTime convertNanosecondsToDateTime(int nanoseconds) {
-  print('convertNanosecondsToDateTime');
-  // Nanoseconds to microseconds
-  int microSeconds = nanoseconds ~/ 100;
-
-  // Create a DateTime object from the ticks
-  DateTime dateTime = DateTime.utc(1970, 1, 1, 0, 0, 0)
-      .add(Duration(microseconds: microSeconds));
-
-  return dateTime;
-}

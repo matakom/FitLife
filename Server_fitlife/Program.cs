@@ -9,7 +9,7 @@ namespace Server_fitlife
     {
         public static HttpListener listener;
         public static string url = "http://172.24.128.1:80/";
-        public static string homeUrl = "http://192.168.1.240:80/";
+        public static string homeUrl = "http://192.168.1.111:80/";
         public static bool AtHome = true;
 
         public static async Task HandleIncomingConnections()
@@ -29,6 +29,7 @@ namespace Server_fitlife
                 HttpListenerRequest request = context.Request;
                 HttpListenerResponse response = context.Response;
                 string textResponse = "";
+                textResponse = "some response";
 
                 Console.WriteLine("-------------------------------------------------------------------");
 
@@ -39,7 +40,7 @@ namespace Server_fitlife
                 {
                     case "/login":
                         await Console.Out.WriteLineAsync("Login");
-                        Database.UserLogin(json["mail"].ToString(), json["firstName"].ToString(), json["lastName"].ToString());
+                        Database.UserLogin(json["mail"].ToString(), json["name"].ToString());
                         break;
                     case "/newKnownActivity":
                         await Console.Out.WriteLineAsync("Known Activity");
@@ -49,8 +50,11 @@ namespace Server_fitlife
                         await Console.Out.WriteLineAsync("Anonymous Activity");
                         AnonymousActivity(json);
                         break;
+                    default:
+                        await Console.Out.WriteLineAsync("Wrong path");
+                        textResponse = "WRONG PATH";
+                        break;
                 }
-
 
 
                 byte[] data = Encoding.UTF8.GetBytes(textResponse);
@@ -90,7 +94,7 @@ namespace Server_fitlife
             {
                 url = homeUrl;
             }
-            
+
             listener = new HttpListener();
             listener.Prefixes.Add(url);
             listener.Start();

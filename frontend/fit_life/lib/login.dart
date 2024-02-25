@@ -1,25 +1,22 @@
-//import 'package:googleapis/fitness/v1.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'connection.dart' as server;
 
 
 Future<bool> loginUser() async {
-  print('loginUser');
-  User? user = await my_authentication().signInWithGoogle();
-  print('done maybe...');
+  User? user = await MyAuthentication().signInWithGoogle();
   if(user?.emailVerified ?? false){
+    server.Connection.login(user?.email ?? '', user?.displayName ?? '');
     return true;
   }
   return false;
 }
 
 Future<void> logoutUser() async {
-  print('logoutUser');
-  await my_authentication().signOut();
-  print('done maybe...');
+  await MyAuthentication().signOut();
 }
 
-class my_authentication{
+class MyAuthentication{
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
