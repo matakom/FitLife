@@ -1,14 +1,39 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'home.dart';
+import 'connection.dart' as server;
+import 'package:workmanager/workmanager.dart';
+
+
+const periodicTask = "my_periodic_task";
+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) {
+    switch(task){
+      case periodicTask:
+        server.Connection.steps();
+        print('Periodic task executed at ${DateTime.now()}');
+    }
+    return Future.value(true);
+  });
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+
+  Workmanager().initialize(
+    callbackDispatcher, // The top level function, aka callbackDispatcher
+    isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+  );
+  Workmanager().registerPeriodicTask(periodicTask, periodicTask, frequency: const Duration(minutes: 15), initialDelay: const Duration(seconds: 30));
+
   runApp(const MainApp());
 }
 

@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'steps.dart' as stepsCounter;
+import 'package:intl/intl.dart';
+import 'preferences.dart' as preferences;
 
 class Connection{
-  static const String serverIp = '192.168.180.109';
-  static const String serverIpHome = '192.168.1.111';
+  static const String ipAddress = '10.0.3.101';
   static const int port = 80;
   static late HttpClient client;
 
@@ -12,11 +13,11 @@ class Connection{
     if(mail == '' || name == ''){
       throw Exception('Is null and should not be');
     }
-    
+    print('login request');    
     client = HttpClient();
 
     try{
-      HttpClientRequest request = await client.post(serverIpHome, port, '/login');
+      HttpClientRequest request = await client.post(ipAddress, port, '/login');
 
       String jsonData = '{"mail": "$mail", "name": "$name"}';
       int contentLength = utf8.encode(jsonData).length;
@@ -27,28 +28,24 @@ class Connection{
       HttpClientResponse response = await request.close();
 
       final data = await response.transform(utf8.decoder).join();
-      print(data);
+      print('Response: $data');
       client.close();
     }
     catch(error){
       print(error.toString());
     }    
-
-    final Uri url = Uri.http(serverIpHome, '');
-
-    var response = await http.post(url);
-
-    print('response: ${response.body}');
   }
 
-  static void test() async{
+  static Future<void> steps() async{
 
     client = HttpClient();
-
     try{
-      HttpClientRequest request = await client.post(serverIpHome, port, '');
+      HttpClientRequest request = await client.post(ipAddress, port, '/newKnownActivity');
 
-    String jsonData = '{"type": "steps", "count": "5000", "startTime": "morning", "endTime": "now"}';
+      final DateFormat format = DateFormat('MM/dd/yyyy');
+
+      //String jsonData = '{"activity": "steps", "count": "${stepsCounter.Steps.getSteps()}", "startTime": "${format.format(DateTime.now())} 00:00:00", "endTime": "${format.format(DateTime.now().add( const Duration(days: 1)))} 00:00:00", "user": "${preferences.Preferences.getMail()}"}';
+      String jsonData = '{"activity": "steps", "count": "${stepsCounter.Steps.getSteps()}", "startTime": "${format.format(DateTime.now())} 00:00:00", "endTime": "${format.format(DateTime.now().add( const Duration(days: 1)))} 00:00:00", "user": "mata.komarek@gmail.com"}';
       int contentLength = utf8.encode(jsonData).length;
       request.headers.add(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
       request.headers.add(HttpHeaders.contentLengthHeader, contentLength.toString());
@@ -57,17 +54,40 @@ class Connection{
       HttpClientResponse response = await request.close();
 
       final data = await response.transform(utf8.decoder).join();
-      print(data);
+      print('Response: $data');
+    }
+    finally{
+      client.close();
+    }
+  }
+  static void getSteps() async{
+
+    client = HttpClient();
+    int steps = 0;
+    try{
+      HttpClientRequest request = await client.get(ipAddress, port, '/getSteps');
+
+      final DateFormat format = DateFormat('MM/dd/yyyy');
+
+      String jsonData = '{"time": "${format.format(DateTime.now())} 00:00:00", "user": "${preferences.Preferences.getMail()}"}';
+      int contentLength = utf8.encode(jsonData).length;
+      request.headers.add(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
+      request.headers.add(HttpHeaders.contentLengthHeader, contentLength.toString());
+      request.write(jsonData);
+
+      HttpClientResponse response = await request.close();
+
+      final data = await response.transform(utf8.decoder).join();
+
+      steps = int.parse(data);
+
+      print('Response: $data');
     }
     finally{
       client.close();
     }
 
-    final Uri url = Uri.http(serverIpHome, '');
+    stepsCounter.Steps.addSteps(steps);
 
-    var response = await http.post(url);
-
-    print('response: ${response.body}');
   }
-
 }

@@ -37,7 +37,9 @@ namespace Server_fitlife
             int userId = await GetUserId(gmail);
 
             await using (NpgsqlCommand cmd = new NpgsqlCommand("INSERT INTO physical_activities (user_id, activity, start_time, end_time, count) " +
-                                                                "VALUES (@user_id, @activity, @start_time, @end_time, @count)", connection))
+                                                                "VALUES (@user_id, @activity, @start_time, @end_time, @count)" +
+                                                                "ON CONFLICT (user_id, start_time) " +
+                                                                "DO UPDATE SET count = @count", connection))
             {
                 cmd.Parameters.AddWithValue("user_id", userId);
                 cmd.Parameters.AddWithValue("activity", "steps");
@@ -61,7 +63,7 @@ namespace Server_fitlife
                 await cmd.ExecuteNonQueryAsync();
             }
         }
-        public static async void UserLogin(string gmail, string name)
+        public static async Task UserLogin(string gmail, string name)
         {
             await using (var cmd = new NpgsqlCommand("INSERT INTO users (gmail, name, registration_date, last_login_date) " +
                 "VALUES (@gmail, @name, @registrationDate, @lastLoginDate)" +
@@ -97,5 +99,29 @@ namespace Server_fitlife
             return userId;
         
         }
+        public static async Task<int> GetSteps(string gmail, DateTime time)
+        {
+            int user_id = await GetUserId(gmail);
+            int steps = 0;
+            await using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT count FROM physical_activities WHERE user_id = @user_id AND start_time = @time", connection))
+            {
+                cmd.Parameters.AddWithValue("time", time);
+                cmd.Parameters.AddWithValue("user_id", user_id);
+
+                NpgsqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    steps = Int32.Parse(reader[0].ToString());
+                }
+                reader.Close();
+            }
+
+            if (steps < 0)
+            {
+                throw new Exception("Steps must be bigger than 0!");
+            }
+            return steps;
+        }
+    
     }
 }

@@ -8,9 +8,7 @@ namespace Server_fitlife
     class Program
     {
         public static HttpListener listener;
-        public static string url = "http://172.24.128.1:80/";
-        public static string homeUrl = "http://192.168.1.111:80/";
-        public static bool AtHome = true;
+        public static string url = "http://10.0.3.101/";
 
         public static async Task HandleIncomingConnections()
         {
@@ -29,18 +27,18 @@ namespace Server_fitlife
                 HttpListenerRequest request = context.Request;
                 HttpListenerResponse response = context.Response;
                 string textResponse = "";
-                textResponse = "some response";
 
                 Console.WriteLine("-------------------------------------------------------------------");
 
                 string body = StreamToString(request.InputStream);
                 JObject json = JsonConvert.DeserializeObject<dynamic>(body);
-                
+
+                await Console.Out.WriteLineAsync(json.ToString());
                 switch (request.Url.AbsolutePath)
                 {
                     case "/login":
                         await Console.Out.WriteLineAsync("Login");
-                        Database.UserLogin(json["mail"].ToString(), json["name"].ToString());
+                        await Database.UserLogin(json["mail"].ToString(), json["name"].ToString());
                         break;
                     case "/newKnownActivity":
                         await Console.Out.WriteLineAsync("Known Activity");
@@ -49,6 +47,11 @@ namespace Server_fitlife
                     case "/newAnonymousActivity":
                         await Console.Out.WriteLineAsync("Anonymous Activity");
                         AnonymousActivity(json);
+                        break;
+                    case "/getSteps":
+                        await Console.Out.WriteLineAsync("Get Steps");
+                        int steps = await GetSteps(json);
+                        textResponse += steps.ToString();
                         break;
                     default:
                         await Console.Out.WriteLineAsync("Wrong path");
@@ -67,7 +70,13 @@ namespace Server_fitlife
             }
         }
 
-     
+        static async Task<int> GetSteps(JObject json)
+        {
+            DateTime time = Convert.ToDateTime(json["time"]);
+            string gmail = json["user"].ToString() ?? throw new Exception("Property is null, which it should not be");
+
+            return await Database.GetSteps(gmail, time);
+        }
         static void AnonymousActivity(JObject json)
         {
             DateTime start = Convert.ToDateTime(json["startTime"]);
@@ -90,11 +99,6 @@ namespace Server_fitlife
         }
         static void Main(string[] args)
         {
-            if(AtHome)
-            {
-                url = homeUrl;
-            }
-
             listener = new HttpListener();
             listener.Prefixes.Add(url);
             listener.Start();

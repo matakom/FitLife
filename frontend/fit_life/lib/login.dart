@@ -1,12 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fit_life/preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'connection.dart' as server;
+import 'steps.dart' as stepCounter;
 
 
 Future<bool> loginUser() async {
   User? user = await MyAuthentication().signInWithGoogle();
   if(user?.emailVerified ?? false){
     server.Connection.login(user?.email ?? '', user?.displayName ?? '');
+    Preferences.setMail(user?.email ?? '');
+    server.Connection.getSteps();
     return true;
   }
   return false;
@@ -14,6 +18,7 @@ Future<bool> loginUser() async {
 
 Future<void> logoutUser() async {
   await MyAuthentication().signOut();
+  stepCounter.Steps.resetSteps();
 }
 
 class MyAuthentication{

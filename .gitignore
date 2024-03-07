@@ -2,6 +2,7 @@
 .private
 private/
 .env
+graphics/
 
 # Sha key
 my-release-key.jks
