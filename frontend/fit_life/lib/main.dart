@@ -1,38 +1,15 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'home.dart';
-import 'connection.dart' as server;
-import 'package:workmanager/workmanager.dart';
-
-
-const periodicTask = "my_periodic_task";
-
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) {
-    switch(task){
-      case periodicTask:
-        server.Connection.steps();
-        print('Periodic task executed at ${DateTime.now()}');
-    }
-    return Future.value(true);
-  });
-}
+//import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-
-  Workmanager().initialize(
-    callbackDispatcher, // The top level function, aka callbackDispatcher
-    isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-  );
-  Workmanager().registerPeriodicTask(periodicTask, periodicTask, frequency: const Duration(minutes: 15), initialDelay: const Duration(seconds: 30));
 
   runApp(const MainApp());
 }
@@ -80,8 +57,7 @@ class _PageNavigatorState extends State<PageNavigator> {
 // Navigation - STFUL widget for changing pages when logged in
 class Navigation extends StatefulWidget {
   final Function(bool) updateLoginStatus;
-  const Navigation({Key? key, required this.updateLoginStatus})
-      : super(key: key);
+  const Navigation({super.key, required this.updateLoginStatus});
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -130,7 +106,7 @@ class Tips extends StatelessWidget {
 
 class Settings extends StatelessWidget {
   final Function(bool) updateLoginStatus;
-  const Settings({Key? key, required this.updateLoginStatus}) : super(key: key);
+  const Settings({super.key, required this.updateLoginStatus});
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +135,7 @@ class Settings extends StatelessWidget {
 
 class BottomNavBar extends StatefulWidget {
   final Function(int) updateIndex;
-  const BottomNavBar({Key? key, required this.updateIndex}) : super(key: key);
+  const BottomNavBar({super.key, required this.updateIndex});
 
   @override
   State<BottomNavBar> createState() => _BottomNavBarState();
@@ -196,9 +172,9 @@ class LoginPage extends StatelessWidget {
   final Function(bool) updateLoginStatus;
 
   const LoginPage({
-    Key? key,
+    super.key,
     required this.updateLoginStatus,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

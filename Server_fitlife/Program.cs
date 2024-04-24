@@ -8,7 +8,7 @@ namespace Server_fitlife
     class Program
     {
         public static HttpListener listener;
-        public static string url = "http://10.0.3.101/";
+        public static string url = "http://192.168.1.111:80/";
 
         public static async Task HandleIncomingConnections()
         {
@@ -40,7 +40,7 @@ namespace Server_fitlife
                         await Console.Out.WriteLineAsync("Login");
                         await Database.UserLogin(json["mail"].ToString(), json["name"].ToString());
                         break;
-                    case "/newKnownActivity":
+                    case "/newKnownActivity":   
                         await Console.Out.WriteLineAsync("Known Activity");
                         KnownActivity(json);
                         break;

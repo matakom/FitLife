@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'steps.dart' as stepsCounter;
+import 'package:flutter/material.dart';
+import 'steps.dart' as steps_counter;
 import 'package:intl/intl.dart';
 import 'preferences.dart' as preferences;
 
@@ -13,7 +14,7 @@ class Connection{
     if(mail == '' || name == ''){
       throw Exception('Is null and should not be');
     }
-    print('login request');    
+    debugPrint('login request');    
     client = HttpClient();
 
     try{
@@ -28,11 +29,11 @@ class Connection{
       HttpClientResponse response = await request.close();
 
       final data = await response.transform(utf8.decoder).join();
-      print('Response: $data');
+      debugPrint('Response: $data');
       client.close();
     }
     catch(error){
-      print(error.toString());
+      debugPrint(error.toString());
     }    
   }
 
@@ -44,8 +45,8 @@ class Connection{
 
       final DateFormat format = DateFormat('MM/dd/yyyy');
 
-      //String jsonData = '{"activity": "steps", "count": "${stepsCounter.Steps.getSteps()}", "startTime": "${format.format(DateTime.now())} 00:00:00", "endTime": "${format.format(DateTime.now().add( const Duration(days: 1)))} 00:00:00", "user": "${preferences.Preferences.getMail()}"}';
-      String jsonData = '{"activity": "steps", "count": "${stepsCounter.Steps.getSteps()}", "startTime": "${format.format(DateTime.now())} 00:00:00", "endTime": "${format.format(DateTime.now().add( const Duration(days: 1)))} 00:00:00", "user": "mata.komarek@gmail.com"}';
+      //String jsonData = '{"activity": "steps", "count": "${steps_counter.Steps.getSteps()}", "startTime": "${format.format(DateTime.now())} 00:00:00", "endTime": "${format.format(DateTime.now().add( const Duration(days: 1)))} 00:00:00", "user": "${preferences.Preferences.getMail()}"}';
+      String jsonData = '{"activity": "steps", "count": "${steps_counter.Steps.getSteps()}", "startTime": "${format.format(DateTime.now())} 00:00:00", "endTime": "${format.format(DateTime.now().add( const Duration(days: 1)))} 00:00:00", "user": "mata.komarek@gmail.com"}';
       int contentLength = utf8.encode(jsonData).length;
       request.headers.add(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
       request.headers.add(HttpHeaders.contentLengthHeader, contentLength.toString());
@@ -54,7 +55,7 @@ class Connection{
       HttpClientResponse response = await request.close();
 
       final data = await response.transform(utf8.decoder).join();
-      print('Response: $data');
+      debugPrint('Response: $data');
     }
     finally{
       client.close();
@@ -81,13 +82,13 @@ class Connection{
 
       steps = int.parse(data);
 
-      print('Response: $data');
+      debugPrint('Response: $data');
     }
     finally{
       client.close();
     }
 
-    stepsCounter.Steps.addSteps(steps);
+    steps_counter.Steps.addSteps(steps);
 
   }
 }

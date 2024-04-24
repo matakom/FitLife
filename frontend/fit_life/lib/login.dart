@@ -2,7 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fit_life/preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'connection.dart' as server;
-import 'steps.dart' as stepCounter;
+import 'steps.dart' as steps_counter;
+import 'package:flutter/material.dart';
 
 
 Future<bool> loginUser() async {
@@ -18,7 +19,7 @@ Future<bool> loginUser() async {
 
 Future<void> logoutUser() async {
   await MyAuthentication().signOut();
-  stepCounter.Steps.resetSteps();
+  steps_counter.Steps.resetSteps();
 }
 
 class MyAuthentication{
@@ -40,7 +41,7 @@ class MyAuthentication{
       User? user = authResult.user;
       return user;
     } catch (error) {
-      print("Google Sign-In Error: $error");
+      debugPrint("Google Sign-In Error: $error");
       return null;
     }
   }

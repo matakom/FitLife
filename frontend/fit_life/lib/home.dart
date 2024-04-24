@@ -1,9 +1,8 @@
 import 'package:fit_life/steps.dart';
 import 'package:flutter/material.dart';
-import 'connection.dart' as server;
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart' as permission;
-import 'steps.dart' as stepCounter;
+import 'steps.dart' as steps_counter;
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -39,7 +38,7 @@ class _HomeState extends State<Home> {
     // Counters bug - every new build it gets one more step
     Steps.addSteps(-1);
 
-    if(this.mounted){
+    if(mounted){
       setState(() {
         Steps.steps = Steps.steps;
       });
@@ -56,7 +55,7 @@ class _HomeState extends State<Home> {
   // Handle step count changed
   void onStepCount(StepCount event) {
     Steps.addSteps(1);
-    if(this.mounted){
+    if(mounted){
       setState(() {
         Steps.steps = Steps.steps;
       });
@@ -65,7 +64,7 @@ class _HomeState extends State<Home> {
 
   // Handle status changed
   void onPedestrianStatusChanged(PedestrianStatus event) {
-    if(this.mounted){
+    if(mounted){
       setState(() {
         _state = event.status;
       });
@@ -74,21 +73,25 @@ class _HomeState extends State<Home> {
 
   // Handle the error
   void onPedestrianStatusError(error) {
-    print('onPedestrianStatusError: $error');
+    debugPrint('onPedestrianStatusError: $error');
   }
 
   // Handle the error
-  void onStepCountError(error) {
-    print('onStepCountError: $error');
+  void onStepsCounterError(error) {
+    debugPrint('onStepsCounterError: $error');
   }
 
   void initPlatformState() async {
-    _pedestrianStatusStream = await Pedometer.pedestrianStatusStream;
-    _stepCountStream = await Pedometer.stepCountStream;
+    _pedestrianStatusStream = Pedometer.pedestrianStatusStream;
+    _stepCountStream = Pedometer.stepCountStream;
 
-    _stepCountStream.listen(onStepCount).onError(onStepCountError);
+    _stepCountStream.listen(onStepCount).onError(onStepsCounterError);
 
     _pedestrianStatusStream.listen(onPedestrianStatusChanged).onError(onPedestrianStatusError);
+
+    permission.Permission.activityRecognition.request();
+    permission.Permission.sensors.request();
+
 
   }
   
@@ -102,7 +105,7 @@ class _HomeState extends State<Home> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'Steps: ${stepCounter.Steps.steps}',
+                  'Steps: ${steps_counter.Steps.steps}',
                   style: const TextStyle(fontSize: 40),
                 ),
                 Text(

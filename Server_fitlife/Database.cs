@@ -36,13 +36,12 @@ namespace Server_fitlife
         {
             int userId = await GetUserId(gmail);
 
-            await using (NpgsqlCommand cmd = new NpgsqlCommand("INSERT INTO physical_activities (user_id, activity, start_time, end_time, count) " +
-                                                                "VALUES (@user_id, @activity, @start_time, @end_time, @count)" +
+            await using (NpgsqlCommand cmd = new NpgsqlCommand("INSERT INTO physical_activities (user_id, start_time, end_time, count) " +
+                                                                "VALUES (@user_id, @start_time, @end_time, @count)" +
                                                                 "ON CONFLICT (user_id, start_time) " +
                                                                 "DO UPDATE SET count = @count", connection))
             {
                 cmd.Parameters.AddWithValue("user_id", userId);
-                cmd.Parameters.AddWithValue("activity", "steps");
                 cmd.Parameters.AddWithValue("start_time", start);
                 cmd.Parameters.AddWithValue("end_time", end);
                 cmd.Parameters.AddWithValue("count", count);
@@ -103,6 +102,7 @@ namespace Server_fitlife
         {
             int user_id = await GetUserId(gmail);
             int steps = 0;
+            // Will need to make a option for range
             await using (NpgsqlCommand cmd = new NpgsqlCommand("SELECT count FROM physical_activities WHERE user_id = @user_id AND start_time = @time", connection))
             {
                 cmd.Parameters.AddWithValue("time", time);
