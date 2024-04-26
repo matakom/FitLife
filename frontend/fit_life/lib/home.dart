@@ -3,6 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart' as permission;
 import 'steps.dart' as steps_counter;
+import 'package:flutter/services.dart';
+
+const methodChannel = MethodChannel('kotlinChannel');
+
+Future<void> getUsageStats() async {
+  try {
+    print('before getting usage data');
+    final Map<dynamic, dynamic> usageStats = await methodChannel.invokeMethod('getUsageStats');
+    print('Usage stats: $usageStats');
+  } 
+  on PlatformException catch (e) {
+    print("Failed to get usage stats: '${e.message}'.");
+  }
+}
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,6 +26,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
 
   String _state = '';
   late Stream<StepCount> _stepCountStream;
@@ -44,6 +59,8 @@ class _HomeState extends State<Home> {
       });
     }
 
+    getUsageStats();
+
   }
 
   @override
@@ -73,12 +90,12 @@ class _HomeState extends State<Home> {
 
   // Handle the error
   void onPedestrianStatusError(error) {
-    debugPrint('onPedestrianStatusError: $error');
+    print('onPedestrianStatusError: $error');
   }
 
   // Handle the error
   void onStepsCounterError(error) {
-    debugPrint('onStepsCounterError: $error');
+    print('onStepsCounterError: $error');
   }
 
   void initPlatformState() async {

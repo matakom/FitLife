@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'steps.dart' as steps_counter;
 import 'package:intl/intl.dart';
 import 'preferences.dart' as preferences;
@@ -14,7 +13,7 @@ class Connection{
     if(mail == '' || name == ''){
       throw Exception('Is null and should not be');
     }
-    debugPrint('login request');    
+    print('login request');    
     client = HttpClient();
 
     try{
@@ -29,11 +28,11 @@ class Connection{
       HttpClientResponse response = await request.close();
 
       final data = await response.transform(utf8.decoder).join();
-      debugPrint('Response: $data');
+      print('Response: $data');
       client.close();
     }
     catch(error){
-      debugPrint(error.toString());
+      print(error.toString());
     }    
   }
 
@@ -55,7 +54,7 @@ class Connection{
       HttpClientResponse response = await request.close();
 
       final data = await response.transform(utf8.decoder).join();
-      debugPrint('Response: $data');
+      print('Response: $data');
     }
     finally{
       client.close();
@@ -82,7 +81,7 @@ class Connection{
 
       steps = int.parse(data);
 
-      debugPrint('Response: $data');
+      print('Response: $data');
     }
     finally{
       client.close();

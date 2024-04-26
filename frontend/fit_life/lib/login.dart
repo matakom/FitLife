@@ -3,7 +3,6 @@ import 'package:fit_life/preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'connection.dart' as server;
 import 'steps.dart' as steps_counter;
-import 'package:flutter/material.dart';
 
 
 Future<bool> loginUser() async {
@@ -41,7 +40,7 @@ class MyAuthentication{
       User? user = authResult.user;
       return user;
     } catch (error) {
-      debugPrint("Google Sign-In Error: $error");
+      print("Google Sign-In Error: $error");
       return null;
     }
   }

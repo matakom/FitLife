@@ -11,6 +11,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+
   runApp(const MainApp());
 }
 
@@ -31,7 +32,6 @@ class MainApp extends StatelessWidget {
 // PageNavigator - STFUL widget deciding if logged in or not
 class PageNavigator extends StatefulWidget {
   const PageNavigator({super.key});
-
   @override
   State<PageNavigator> createState() => _PageNavigatorState();
 }
