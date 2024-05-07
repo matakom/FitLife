@@ -1,5 +1,6 @@
 package com.example.fit_life
 
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -16,7 +17,7 @@ import java.util.Calendar
 
 
 
-class MainActivity: FlutterActivity() {
+class MainActivity: FlutterFragmentActivity() {
 
     private val USAGE_STATS_PERMISSION_REQUEST_CODE = 1000
 
@@ -33,9 +34,6 @@ class MainActivity: FlutterActivity() {
                     android.os.Process.myUid(), packageName
                 )
 
-                Log.d("mode", mode.toString())
-                Log.d("appopsmanager.mode_allowed", AppOpsManager.MODE_ALLOWED.toString())
-
                 if(mode != AppOpsManager.MODE_ALLOWED){
                     val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
                     startActivity(intent)
@@ -43,7 +41,7 @@ class MainActivity: FlutterActivity() {
                 }
                 else{
 
-                    val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+                    val usageStatsManager = this.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
                     val calendar = Calendar.getInstance()
                     val endTime = calendar.timeInMillis
 
@@ -53,8 +51,6 @@ class MainActivity: FlutterActivity() {
                     calendar.set(Calendar.MILLISECOND, 0)
                     val startTime = calendar.timeInMillis
                     
-                    Log.d("startTime", startTime.toString())
-                    Log.d("endTime", endTime.toString())
                     val usageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
                     
                     val screenTimeMap = mutableMapOf<String, Long>()

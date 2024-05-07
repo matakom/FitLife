@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'steps.dart' as steps_counter;
 import 'package:intl/intl.dart';
 import 'preferences.dart' as preferences;
 
@@ -45,7 +44,7 @@ class Connection{
       final DateFormat format = DateFormat('MM/dd/yyyy');
 
       //String jsonData = '{"activity": "steps", "count": "${steps_counter.Steps.getSteps()}", "startTime": "${format.format(DateTime.now())} 00:00:00", "endTime": "${format.format(DateTime.now().add( const Duration(days: 1)))} 00:00:00", "user": "${preferences.Preferences.getMail()}"}';
-      String jsonData = '{"activity": "steps", "count": "${steps_counter.Steps.getSteps()}", "startTime": "${format.format(DateTime.now())} 00:00:00", "endTime": "${format.format(DateTime.now().add( const Duration(days: 1)))} 00:00:00", "user": "mata.komarek@gmail.com"}';
+      String jsonData = '{"activity": "steps", "count": "${500}", "startTime": "${format.format(DateTime.now())} 00:00:00", "endTime": "${format.format(DateTime.now().add( const Duration(days: 1)))} 00:00:00", "user": "mata.komarek@gmail.com"}';
       int contentLength = utf8.encode(jsonData).length;
       request.headers.add(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
       request.headers.add(HttpHeaders.contentLengthHeader, contentLength.toString());
@@ -61,6 +60,8 @@ class Connection{
     }
   }
   static void getSteps() async{
+
+    return; //---------------------------------------------------------------------------------
 
     client = HttpClient();
     int steps = 0;
@@ -86,8 +87,6 @@ class Connection{
     finally{
       client.close();
     }
-
-    steps_counter.Steps.addSteps(steps);
 
   }
 }

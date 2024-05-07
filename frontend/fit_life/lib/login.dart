@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fit_life/preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'connection.dart' as server;
-import 'steps.dart' as steps_counter;
 
 
 Future<bool> loginUser() async {
@@ -18,7 +17,6 @@ Future<bool> loginUser() async {
 
 Future<void> logoutUser() async {
   await MyAuthentication().signOut();
-  steps_counter.Steps.resetSteps();
 }
 
 class MyAuthentication{
