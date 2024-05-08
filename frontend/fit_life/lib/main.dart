@@ -80,7 +80,7 @@ class _NavigationState extends State<Navigation> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.amber[300],
+      color: backgroundGrey,
       child: Scaffold(
         body: pages[index],
         bottomNavigationBar: BottomNavBar(updateIndex: _updateIndex),
@@ -111,19 +111,19 @@ class Settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.amber[300],
+      color: backgroundGrey,
       child: Center(
         child: Column(
           children: [
             Container(
               margin: const EdgeInsets.only(top: 60),
-              child: ElevatedButton(
+              child: OutlinedButton(
                 onPressed: () {
                   logoutUser();
                   updateLoginStatus(false);
                 },
-                style: amberButtonStyle,
-                child: const Text('Logout'),
+                style: buttonStyle,
+                child: const Text('Logout', style: TextStyle(color: orange),),
               ),
             )
           ],
@@ -148,10 +148,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: index,
-      backgroundColor: Colors.amber[800],
+      backgroundColor: titleBlack,
       type: BottomNavigationBarType.fixed,
       showSelectedLabels: false,
       showUnselectedLabels: false,
+      selectedItemColor: orange,
+      unselectedItemColor: lightShadow,
       onTap: (x) {
         setState(() {
           index = x;
@@ -179,7 +181,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.amber[300],
+      color: backgroundGrey,
       child: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -188,21 +190,21 @@ class LoginPage extends StatelessWidget {
               margin: const EdgeInsets.only(top: 60),
               child: const Text(
                 'Login before using Fit Life',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: orange),
                 textAlign: TextAlign.center,
               ),
             ),
             Container(
               margin: const EdgeInsets.only(top: 60),
-              child: ElevatedButton(
+              child: OutlinedButton(
                 onPressed: () async {
                   bool success = await loginUser();
                   updateLoginStatus(success);
                 },
-                style: amberButtonStyle,
+                style: buttonStyle,
                 child: const Text(
                   "Login with google account",
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: orange),
                 ),
               ),
             ),
@@ -224,13 +226,18 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Center(child: Text("Fit Life")),
-      backgroundColor: Colors.amber[800],
+      title: const Center(child: Text("Fit Life", style: TextStyle(color: orange),)),
+      backgroundColor: titleBlack,
     );
   }
 }
 
-final ButtonStyle amberButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.amber[800],
+final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
+  backgroundColor: lightShadow,
+  side: const BorderSide(color: orange, width: 2),
 );
 
+const titleBlack = Color(0xff121212);
+const backgroundGrey = Color(0xff232323);
+const lightShadow = Color(0xff3D3C3C);
+const orange = Color(0xffFF9D00);
