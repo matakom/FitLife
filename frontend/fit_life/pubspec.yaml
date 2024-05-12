@@ -26,3 +26,13 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/
+  fonts:
+  - family: aptly
+    fonts:
+      - asset: assets/Aptly-Regular.otf
+      - asset: assets/Aptly-Bold.otf
+        weight: 800
+      - asset: assets/Aptly-Medium.otf
+        weight: 500

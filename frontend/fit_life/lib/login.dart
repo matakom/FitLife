@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fit_life/preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'connection.dart' as server;
-
+import 'main.dart';
 
 Future<bool> loginUser() async {
   User? user = await MyAuthentication().signInWithGoogle();
@@ -37,7 +37,8 @@ class MyAuthentication{
       UserCredential authResult = await _auth.signInWithCredential(credential);
       User? user = authResult.user;
       return user;
-    } catch (error) {
+    } 
+    catch (error) {
       print("Google Sign-In Error: $error");
       return null;
     }

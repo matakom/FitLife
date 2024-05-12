@@ -1,50 +1,77 @@
+import 'package:fit_life/colors.dart';
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'home.dart';
-//import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-
   runApp(const MainApp());
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
   @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+
+  static bool isAppbarHidden = true;
+
+  @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      theme: ThemeData(
+          primaryColor: Colors.white,
+          splashColor: colors.orange,
+          fontFamily: 'aptly'),
       home: Scaffold(
-        appBar: MainAppBar(),
-        body: PageNavigator(),
+        appBar: isAppbarHidden ? null : const MainAppBar(),
+        body: PageNavigator(updateLoginStatusForBar: _updateLoginStatusForBar,),
       ),
     );
+  }
+
+  void _updateLoginStatusForBar(bool status){
+    setState(() {
+      isAppbarHidden = !status;
+    });
   }
 }
 
 // PageNavigator - STFUL widget deciding if logged in or not
 class PageNavigator extends StatefulWidget {
-  const PageNavigator({super.key});
+  final Function(bool) updateLoginStatusForBar;
+  const PageNavigator({super.key, required this.updateLoginStatusForBar});
   @override
-  State<PageNavigator> createState() => _PageNavigatorState();
+  State<PageNavigator> createState() => _PageNavigatorState(updateLoginStatusForBar: updateLoginStatusForBar);
 }
 
 class _PageNavigatorState extends State<PageNavigator> {
+  final Function(bool) updateLoginStatusForBar;
   bool isLoggedIn = false;
+
+  _PageNavigatorState({required this.updateLoginStatusForBar});
 
   @override
   Widget build(BuildContext context) {
     if (isLoggedIn) {
       return Navigation(updateLoginStatus: _updateLoginStatus);
     }
-    return LoginPage(updateLoginStatus: _updateLoginStatus);
+    return LoginPage(updateLoginStatus: _updateLoginStatus, updateLoginStatusForBar: updateLoginStatusForBar,);
   }
 
   void _updateLoginStatus(bool status) {
@@ -80,7 +107,7 @@ class _NavigationState extends State<Navigation> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: backgroundGrey,
+      color: colors.backgroundGrey,
       child: Scaffold(
         body: pages[index],
         bottomNavigationBar: BottomNavBar(updateIndex: _updateIndex),
@@ -111,7 +138,7 @@ class Settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: backgroundGrey,
+      color: colors.backgroundGrey,
       child: Center(
         child: Column(
           children: [
@@ -123,7 +150,10 @@ class Settings extends StatelessWidget {
                   updateLoginStatus(false);
                 },
                 style: buttonStyle,
-                child: const Text('Logout', style: TextStyle(color: orange),),
+                child: const Text(
+                  'Logout',
+                  style: TextStyle(color: colors.orange),
+                ),
               ),
             )
           ],
@@ -148,12 +178,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: index,
-      backgroundColor: titleBlack,
+      backgroundColor: colors.titleBlack,
       type: BottomNavigationBarType.fixed,
       showSelectedLabels: false,
       showUnselectedLabels: false,
-      selectedItemColor: orange,
-      unselectedItemColor: lightShadow,
+      selectedItemColor: colors.orange,
+      unselectedItemColor: colors.lightShadow,
       onTap: (x) {
         setState(() {
           index = x;
@@ -172,44 +202,104 @@ class _BottomNavBarState extends State<BottomNavBar> {
 // LoginPage - STLES widget for login screen
 class LoginPage extends StatelessWidget {
   final Function(bool) updateLoginStatus;
+  final Function(bool) updateLoginStatusForBar;
 
   const LoginPage({
     super.key,
     required this.updateLoginStatus,
+    required this.updateLoginStatusForBar
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: backgroundGrey,
-      child: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 60),
-              child: const Text(
-                'Login before using Fit Life',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: orange),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(top: 60),
-              child: OutlinedButton(
-                onPressed: () async {
-                  bool success = await loginUser();
-                  updateLoginStatus(success);
-                },
-                style: buttonStyle,
-                child: const Text(
-                  "Login with google account",
-                  style: TextStyle(color: orange),
+      color: colors.backgroundGrey,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/cliff.jpg',
+            fit: BoxFit.cover,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.only(top: 0),
+                      child: const Image(
+                        image: AssetImage('assets/logo_black_noText.png'),
+                        color: colors.loginPageColorOpacity,
+                        height: 450,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(top: 150),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Life tuner',
+                            style: TextStyle(
+                                fontSize: 80,
+                                color: colors.loginPageColor,
+                                fontWeight: FontWeight.w800),
+                          ),
+                          Container(
+                            width: 300,
+                            height: 10,
+                            decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: colors.loginPageColor),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(30)),
+                                color: colors.loginPageColor),
+                          ),
+                          const Text(
+                            'Live your life',
+                            style: TextStyle(
+                                fontSize: 50,
+                                color: colors.loginPageColor,
+                                fontWeight: FontWeight.w800),
+                          ),
+                          Container(
+                            height: 400,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              bool success = await loginUser();
+                              updateLoginStatusForBar(success);
+                              updateLoginStatus(success);
+                            },
+                            style: ButtonStyle(
+                              fixedSize: MaterialStateProperty.all<Size>(
+                                const Size(280, 120)
+                              ),
+                              backgroundColor: const MaterialStatePropertyAll<Color>(colors.whiteOpacity)
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Image(image: AssetImage('assets/google_logo.png'), width: 50),
+                                Text(
+                                  'Login',
+                                  style: TextStyle(color: colors.lightShadow, fontSize: 60),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -221,23 +311,22 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Center(child: Text("Fit Life", style: TextStyle(color: orange),)),
-      backgroundColor: titleBlack,
+      title: const Center(
+          child: Text(
+        "Fit Life",
+        style: TextStyle(color: colors.orange),
+      )),
+      backgroundColor: colors.titleBlack,
     );
   }
 }
 
 final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
-  backgroundColor: lightShadow,
-  side: const BorderSide(color: orange, width: 2),
+  backgroundColor: colors.lightShadow,
+  side: const BorderSide(color: colors.orange, width: 2),
 );
-
-const titleBlack = Color(0xff121212);
-const backgroundGrey = Color(0xff232323);
-const lightShadow = Color(0xff3D3C3C);
-const orange = Color(0xffFF9D00);

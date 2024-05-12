@@ -5,6 +5,8 @@ import 'health.dart' as health;
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'steps.dart';
+import 'package:intl/intl.dart';
+import 'colors.dart';
 
 const methodChannel = MethodChannel('kotlinChannel');
 health.health healthFactory = health.health();
@@ -41,9 +43,9 @@ class _HomeState extends State<Home> {
     getUsageStats();
 
   }
-  Future<void> getUsageStats() async {
+Future<void> getUsageStats() async {
   try {
-    final Map<dynamic, dynamic> usageStats = await methodChannel.invokeMethod('getUsageStats');
+    var usageStats = await methodChannel.invokeMethod('getUsageStats');
     print('Usage stats: $usageStats');
   } 
   on PlatformException catch (e) {
@@ -55,7 +57,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-          color: backgroundGrey,
+          color: colors.backgroundGrey,
           child: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -101,32 +103,37 @@ class _GraphState extends State<Graph> {
           _data = snapshot.data!;
           return SfCartesianChart(
             primaryXAxis: const CategoryAxis(
-              labelStyle: TextStyle(color: orange),
+              labelStyle: TextStyle(color: colors.white),
             ),
             primaryYAxis: const NumericAxis(
-              labelStyle: TextStyle(color: orange),
+              labelStyle: TextStyle(color: colors.white),
               
               majorGridLines: MajorGridLines(
                 width: 1,
               ),
               minorGridLines: MinorGridLines(
                 width: 1,
-                color: Color(0x5fffffff)
+                color: colors.whiteSmallOpacity
               ),
               minorTicksPerInterval: 1,
             ),
             legend: const Legend(isVisible: false),
             tooltipBehavior: TooltipBehavior(enable: true),
-            palette: const [orange],
-            series: <CartesianSeries<StepData, DateTime>>[
-              SplineAreaSeries<StepData, DateTime>(
+            palette: const [colors.orange],
+            series: <CartesianSeries<StepData, String>>[
+              ColumnSeries<StepData, String>(
                   dataSource: _data,
-                  splineType: SplineType.natural,
-                  xValueMapper: (StepData steps, _) => steps.time,
+                  xValueMapper: (StepData steps, _) => DateFormat.Hm().format(steps.time).toString(),
                   yValueMapper: (StepData steps, _) => steps.steps,
-                  animationDuration: 1000,
+                  animationDuration: 2000,
                   name: 'Steps',
-                  dataLabelSettings: const DataLabelSettings(isVisible: true, labelAlignment: ChartDataLabelAlignment.bottom, offset: Offset(0, -5))),
+                  dataLabelSettings: const DataLabelSettings(isVisible: true, 
+                    labelAlignment: ChartDataLabelAlignment.top, 
+                    offset: Offset(0, 20),
+                    color: colors.lightShadow,
+                    showZeroValue: false,
+                    alignment: ChartAlignment.far,
+                    )),
             ]);
         }
       },
