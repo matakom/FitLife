@@ -69,7 +69,7 @@ class _PageNavigatorState extends State<PageNavigator> {
   @override
   Widget build(BuildContext context) {
     if (isLoggedIn) {
-      return Navigation(updateLoginStatus: _updateLoginStatus);
+      return Navigation(updateLoginStatus: _updateLoginStatus, updateLoginStatusForBar: updateLoginStatusForBar);
     }
     return LoginPage(updateLoginStatus: _updateLoginStatus, updateLoginStatusForBar: updateLoginStatusForBar,);
   }
@@ -84,15 +84,19 @@ class _PageNavigatorState extends State<PageNavigator> {
 // Navigation - STFUL widget for changing pages when logged in
 class Navigation extends StatefulWidget {
   final Function(bool) updateLoginStatus;
-  const Navigation({super.key, required this.updateLoginStatus});
+  final Function(bool) updateLoginStatusForBar;
+  const Navigation({super.key, required this.updateLoginStatus, required this.updateLoginStatusForBar});
 
   @override
-  State<Navigation> createState() => _NavigationState();
+  State<Navigation> createState() => _NavigationState(updateLoginStatusForBar: updateLoginStatusForBar);
 }
 
 class _NavigationState extends State<Navigation> {
   int index = 0;
   late List<Widget> pages;
+  final Function(bool) updateLoginStatusForBar;
+
+  _NavigationState({required this.updateLoginStatusForBar});
 
   @override
   void initState() {
@@ -100,7 +104,7 @@ class _NavigationState extends State<Navigation> {
     pages = [
       const Home(),
       const Tips(),
-      Settings(updateLoginStatus: widget.updateLoginStatus),
+      Settings(updateLoginStatus: widget.updateLoginStatus, updateLoginStatusForBar: updateLoginStatusForBar),
     ];
   }
 
@@ -133,7 +137,8 @@ class Tips extends StatelessWidget {
 
 class Settings extends StatelessWidget {
   final Function(bool) updateLoginStatus;
-  const Settings({super.key, required this.updateLoginStatus});
+  final Function(bool) updateLoginStatusForBar;
+  const Settings({super.key, required this.updateLoginStatus, required this.updateLoginStatusForBar});
 
   @override
   Widget build(BuildContext context) {
@@ -147,12 +152,23 @@ class Settings extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () {
                   logoutUser();
+                  updateLoginStatusForBar(false);
                   updateLoginStatus(false);
                 },
                 style: buttonStyle,
-                child: const Text(
-                  'Logout',
-                  style: TextStyle(color: colors.orange),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Icon(
+                      Icons.logout,
+                      color: colors.orange,
+                      size: 40,
+                    ),
+                    Text(
+                      'Logout',
+                      style: TextStyle(color: colors.orange, fontSize: 30),
+                    ),
+                  ],
                 ),
               ),
             )
@@ -329,4 +345,5 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
 final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
   backgroundColor: colors.lightShadow,
   side: const BorderSide(color: colors.orange, width: 2),
+  fixedSize: const Size(200, 70)
 );
