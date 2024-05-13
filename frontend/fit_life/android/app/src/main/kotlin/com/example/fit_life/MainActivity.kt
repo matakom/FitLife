@@ -51,19 +51,29 @@ class MainActivity: FlutterFragmentActivity() {
                     calendar.set(Calendar.MILLISECOND, 0)
                     val startTime = calendar.timeInMillis
 
-                    val intervalData = mutableListOf<List<Map<String, Long>>>()
+                    var i = 1
+                    //val intervalData = mutableListOf<Map<String, Long>>()
+                    val intervalData = mutableListOf<UsageEvent>()
 
-                    var currentHourStart = startTime;
+                    var currentHourStart = startTime
+                    calendar.set(Calendar.HOUR_OF_DAY, i)
+                    var currentHourEnd = calendar.timeInMillis
 
+                    Log.d("Test", "TestKotlin")
 
                     while(currentHourStart < endTimeRounded){
-                        val usageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, currentHourStart, currentHourStart + TimeUnit.HOURS.toMillis(1))
 
-                        
-                        
+                        Log.d("start", currentHourStart.toString())
+                        Log.d("end", currentHourEnd.toString())
+
+                        val usageStats = usageStatsManager.queryEvents(currentHourStart, currentHourEnd)
+
+                        Log.d("statistics", usageStats.toString())
+
+                        /*
                         val screenTimeMap = mutableMapOf<String, Long>()
-                        usageStats?.forEach {
-                            screenTimeMap[it.packageName] = it.totalTimeInForeground
+                        usageStats?.forEach { event ->
+                            screenTimeMap[event.packageName] = event.totalTimeInForeground
                         }
                         
                         // Remove 0 values
@@ -76,9 +86,16 @@ class MainActivity: FlutterFragmentActivity() {
                         }
                         
                         val sortedScreenTimeMap = screenTimeMap.toList().sortedByDescending{(_, value) -> value}.toMap()
-                        val listSortedScreenTimeMap = listOf(sortedScreenTimeMap)
-                        intervalData.add(listSortedScreenTimeMap)
-                        currentHourStart = currentHourStart + TimeUnit.HOURS.toMillis(1)
+                        Log.d("stats", sortedScreenTimeMap.toString())
+                        
+                        intervalData.add(sortedScreenTimeMap)
+                        */
+                        intervalData.add(usageStats)
+
+                        currentHourStart = currentHourEnd
+                        i = i + 1
+                        calendar.set(Calendar.HOUR_OF_DAY, i)
+                        currentHourEnd = calendar.timeInMillis
                     }
                     result.success(intervalData)
                 }

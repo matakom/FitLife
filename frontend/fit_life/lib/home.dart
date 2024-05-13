@@ -1,9 +1,7 @@
-import 'package:fit_life/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'health.dart' as health;
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'steps.dart';
 import 'package:intl/intl.dart';
 import 'colors.dart';
@@ -46,6 +44,8 @@ class _HomeState extends State<Home> {
 Future<void> getUsageStats() async {
   try {
     var usageStats = await methodChannel.invokeMethod('getUsageStats');
+
+      
     print('Usage stats: $usageStats');
   } 
   on PlatformException catch (e) {
