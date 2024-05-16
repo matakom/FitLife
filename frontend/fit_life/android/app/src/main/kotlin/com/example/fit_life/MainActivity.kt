@@ -6,6 +6,8 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import androidx.annotation.NonNull
 import android.app.usage.UsageStatsManager
+import android.app.usage.UsageEvents
+import android.app.usage.UsageEvents.Event
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -18,9 +20,6 @@ import java.util.concurrent.TimeUnit
 
 
 class MainActivity: FlutterFragmentActivity() {
-
-    private val USAGE_STATS_PERMISSION_REQUEST_CODE = 1000
-
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "kotlinChannel").setMethodCallHandler {
@@ -53,13 +52,11 @@ class MainActivity: FlutterFragmentActivity() {
 
                     var i = 1
                     //val intervalData = mutableListOf<Map<String, Long>>()
-                    val intervalData = mutableListOf<UsageEvent>()
+                    val intervalData = mutableListOf<UsageEvents>()
 
                     var currentHourStart = startTime
                     calendar.set(Calendar.HOUR_OF_DAY, i)
                     var currentHourEnd = calendar.timeInMillis
-
-                    Log.d("Test", "TestKotlin")
 
                     while(currentHourStart < endTimeRounded){
 
@@ -91,6 +88,12 @@ class MainActivity: FlutterFragmentActivity() {
                         intervalData.add(sortedScreenTimeMap)
                         */
                         intervalData.add(usageStats)
+
+                        while(usageStats.hasNextEvent()){
+                            val event = UsageEvents.Event()
+                            usageStats.getNextEvent(event)
+                            Log.d("usage", event.packageName.toString() + "|" + event.eventType + "|" + event.timeStamp)
+                        }
 
                         currentHourStart = currentHourEnd
                         i = i + 1
