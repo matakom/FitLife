@@ -17,13 +17,19 @@ import android.util.Log
 import android.provider.Settings
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 
+
+@Serializable
+data class Data(val name: String, val type: Int, val timeStamp: Long)
 
 class MainActivity: FlutterFragmentActivity() {
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "kotlinChannel").setMethodCallHandler {
-          call, result ->
+            call, result ->
             if(call.method == "getUsageStats") {
 
                 val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
@@ -53,6 +59,7 @@ class MainActivity: FlutterFragmentActivity() {
                     var i = 1
                     //val intervalData = mutableListOf<Map<String, Long>>()
                     val intervalData = mutableListOf<UsageEvents>()
+                    val myJson = mutableListOf<String>()
 
                     var currentHourStart = startTime
                     calendar.set(Calendar.HOUR_OF_DAY, i)
@@ -65,34 +72,13 @@ class MainActivity: FlutterFragmentActivity() {
 
                         val usageStats = usageStatsManager.queryEvents(currentHourStart, currentHourEnd)
 
-                        Log.d("statistics", usageStats.toString())
-
-                        /*
-                        val screenTimeMap = mutableMapOf<String, Long>()
-                        usageStats?.forEach { event ->
-                            screenTimeMap[event.packageName] = event.totalTimeInForeground
-                        }
-                        
-                        // Remove 0 values
-                        val iterator = screenTimeMap.entries.iterator()
-                        while (iterator.hasNext()) {
-                            val entry = iterator.next()
-                            if (entry.value == 0L) {
-                                iterator.remove()
-                            }
-                        }
-                        
-                        val sortedScreenTimeMap = screenTimeMap.toList().sortedByDescending{(_, value) -> value}.toMap()
-                        Log.d("stats", sortedScreenTimeMap.toString())
-                        
-                        intervalData.add(sortedScreenTimeMap)
-                        */
                         intervalData.add(usageStats)
 
                         while(usageStats.hasNextEvent()){
                             val event = UsageEvents.Event()
                             usageStats.getNextEvent(event)
                             Log.d("usage", event.packageName.toString() + "|" + event.eventType + "|" + event.timeStamp)
+                            myJson.add(Json.encodeToString( Data(event.packageName.toString(), event.eventType, event.timeStamp)))
                         }
 
                         currentHourStart = currentHourEnd
@@ -100,7 +86,7 @@ class MainActivity: FlutterFragmentActivity() {
                         calendar.set(Calendar.HOUR_OF_DAY, i)
                         currentHourEnd = calendar.timeInMillis
                     }
-                    result.success(intervalData)
+                    result.success(myJson)
                 }
                     
                 }
