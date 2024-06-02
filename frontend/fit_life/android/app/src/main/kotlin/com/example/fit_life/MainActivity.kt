@@ -59,16 +59,12 @@ class MainActivity: FlutterFragmentActivity() {
                     var i = 1
                     //val intervalData = mutableListOf<Map<String, Long>>()
                     val intervalData = mutableListOf<UsageEvents>()
-                    val myJson = mutableListOf<String>()
-
+                    val myJson = mutableListOf<Data>()
                     var currentHourStart = startTime
                     calendar.set(Calendar.HOUR_OF_DAY, i)
                     var currentHourEnd = calendar.timeInMillis
 
                     while(currentHourStart < endTimeRounded){
-
-                        Log.d("start", currentHourStart.toString())
-                        Log.d("end", currentHourEnd.toString())
 
                         val usageStats = usageStatsManager.queryEvents(currentHourStart, currentHourEnd)
 
@@ -77,8 +73,7 @@ class MainActivity: FlutterFragmentActivity() {
                         while(usageStats.hasNextEvent()){
                             val event = UsageEvents.Event()
                             usageStats.getNextEvent(event)
-                            Log.d("usage", event.packageName.toString() + "|" + event.eventType + "|" + event.timeStamp)
-                            myJson.add(Json.encodeToString( Data(event.packageName.toString(), event.eventType, event.timeStamp)))
+                            myJson.add(Data(event.packageName.toString(), event.eventType, event.timeStamp))
                         }
 
                         currentHourStart = currentHourEnd
@@ -86,7 +81,7 @@ class MainActivity: FlutterFragmentActivity() {
                         calendar.set(Calendar.HOUR_OF_DAY, i)
                         currentHourEnd = calendar.timeInMillis
                     }
-                    result.success(myJson)
+                    result.success(Json.encodeToString(myJson))
                 }
                     
                 }

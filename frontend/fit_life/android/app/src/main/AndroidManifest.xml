@@ -9,6 +9,7 @@
     </queries>
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <uses-permission android:name="android.permission.health.READ_STEPS"/>    
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
     <application
         android:label="fit_life"
         android:name="${applicationName}"

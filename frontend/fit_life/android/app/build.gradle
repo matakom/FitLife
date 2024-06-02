@@ -2,8 +2,7 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-    id 'org.jetbrains.kotlin.multiplatform' version '2.0.0-RC3'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '2.0.0-RC3'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.0.0'
 }
 
 def localProperties = new Properties()

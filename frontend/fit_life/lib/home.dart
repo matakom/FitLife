@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'health.dart' as health;
@@ -5,6 +6,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'steps.dart';
 import 'package:intl/intl.dart';
 import 'colors.dart';
+import 'data.dart';
 
 const methodChannel = MethodChannel('kotlinChannel');
 health.health healthFactory = health.health();
@@ -43,10 +45,14 @@ class _HomeState extends State<Home> {
   }
 Future<void> getUsageStats() async {
   try {
-    var usageStats = await methodChannel.invokeMethod('getUsageStats');
+    List<dynamic> jsonList = jsonDecode(await methodChannel.invokeMethod('getUsageStats'));
+
+    List<Data> dataList = jsonList.map((json) => Data.fromJson(json)).toList();
+
+
 
       
-    print('Usage stats: $usageStats');
+    print('Usage stats: ${dataList[0].name}: ${dataList[0].timeStamp}');
   } 
   on PlatformException catch (e) {
     print("Failed to get usage stats: '$e'.");
