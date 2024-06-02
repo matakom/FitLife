@@ -49,10 +49,51 @@ Future<void> getUsageStats() async {
 
     List<Data> dataList = jsonList.map((json) => Data.fromJson(json)).toList();
 
+    Map<String, List<AppEvent>> sortedEvents = parseEvents(dataList);
+
+    int milliSeconds = 0;
+    int previousTimeStamp = -1;
+
+    dataList.forEach((element) {
+      if(element.type == 15 || element.type == 16){
+        if(element.type == 15){
+          previousTimeStamp = element.timeStamp.millisecondsSinceEpoch;
+        }
+        else if (previousTimeStamp != -1){
+          milliSeconds += element.timeStamp.millisecondsSinceEpoch - previousTimeStamp;
+          previousTimeStamp = -1;
+        }
+      }
+    });
+
+    if(previousTimeStamp != -1){
+      milliSeconds += DateTime.now().millisecondsSinceEpoch - previousTimeStamp;
+    }
+
+    Duration interactive = Duration(milliseconds: milliSeconds);
+
+    print("-------------------------");
+    print("Interactive: ${interactive.toString()}");
+    print("-------------------------");
+    print("LENGTH: ${dataList.length}");
+    print("-------------------------");
 
 
+
+
+
+    // List<int> test = List<int>.filled(100, 0);;
+    // dataList.forEach((element) {
+    //   test[element.type] = test[element.type] + 1;
+    //   //print("Code: ${element.type} | Name: ${element.name} | Time: ${element.timeStamp}");
+    // });
+
+    // for(int i = 0; i < 100; i++){
+    //   if(test[i] > 0){
+    //     print("Code: ${i} | Count: ${test[i]}");
+    //   }
+    // }
       
-    print('Usage stats: ${dataList[0].name}: ${dataList[0].timeStamp}');
   } 
   on PlatformException catch (e) {
     print("Failed to get usage stats: '$e'.");

@@ -48,7 +48,7 @@ class MainActivity: FlutterFragmentActivity() {
 
                     val usageStatsManager = this.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
                     val calendar = Calendar.getInstance()
-                    val endTimeRounded = calendar.timeInMillis
+                    val endTime = calendar.timeInMillis
 
                     calendar.set(Calendar.HOUR_OF_DAY, 0)
                     calendar.set(Calendar.MINUTE, 0)
@@ -56,31 +56,18 @@ class MainActivity: FlutterFragmentActivity() {
                     calendar.set(Calendar.MILLISECOND, 0)
                     val startTime = calendar.timeInMillis
 
-                    var i = 1
-                    //val intervalData = mutableListOf<Map<String, Long>>()
-                    val intervalData = mutableListOf<UsageEvents>()
                     val myJson = mutableListOf<Data>()
-                    var currentHourStart = startTime
-                    calendar.set(Calendar.HOUR_OF_DAY, i)
-                    var currentHourEnd = calendar.timeInMillis
 
-                    while(currentHourStart < endTimeRounded){
 
-                        val usageStats = usageStatsManager.queryEvents(currentHourStart, currentHourEnd)
+                    val usageStats = usageStatsManager.queryEvents(startTime, endTime)
 
-                        intervalData.add(usageStats)
 
-                        while(usageStats.hasNextEvent()){
-                            val event = UsageEvents.Event()
-                            usageStats.getNextEvent(event)
-                            myJson.add(Data(event.packageName.toString(), event.eventType, event.timeStamp))
-                        }
-
-                        currentHourStart = currentHourEnd
-                        i = i + 1
-                        calendar.set(Calendar.HOUR_OF_DAY, i)
-                        currentHourEnd = calendar.timeInMillis
+                    while(usageStats.hasNextEvent()){
+                        val event = UsageEvents.Event()
+                        usageStats.getNextEvent(event)
+                        myJson.add(Data(event.packageName.toString(), event.eventType, event.timeStamp))
                     }
+
                     result.success(Json.encodeToString(myJson))
                 }
                     
