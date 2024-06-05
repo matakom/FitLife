@@ -89,8 +89,8 @@ String eventTypeToString(int eventType, String eventName) {
       return 'DEVICE_SHUTDOWN';
     case 27:
       return 'DEVICE_STARTUP';
-
     default:
+      print('Unknown event type: $eventType for event: $eventName');
       return 'UNKNOWN_EVENT_TYPE';
   }
 }

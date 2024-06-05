@@ -58,14 +58,14 @@ class MainActivity: FlutterFragmentActivity() {
 
                     val myJson = mutableListOf<Data>()
 
-
                     val usageStats = usageStatsManager.queryEvents(startTime, endTime)
-
 
                     while(usageStats.hasNextEvent()){
                         val event = UsageEvents.Event()
                         usageStats.getNextEvent(event)
-                        myJson.add(Data(event.packageName.toString(), event.eventType, event.timeStamp))
+                        val appName = getAppName(applicationContext, event.packageName)
+                        Log.d("appName", appName)
+                        myJson.add(Data(appName, event.eventType, event.timeStamp))
                     }
 
                     result.success(Json.encodeToString(myJson))
@@ -75,6 +75,17 @@ class MainActivity: FlutterFragmentActivity() {
                 else {
                     result.notImplemented()
             }
+        }
+    }
+    
+    private fun getAppName(context: Context, packageName: String): String {
+        return try {
+            val packageManager = context.packageManager
+            val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
+            packageManager.getApplicationLabel(applicationInfo).toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.e("MainActivity", "App name not found for package: $packageName")
+            packageName // fallback to package name if the app name is not found
         }
     }
 

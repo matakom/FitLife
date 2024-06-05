@@ -2,8 +2,6 @@
 import 'dart:ui';
 
 class colors{
-
-
   static const titleBlack = Color(0xff121212);
   static const backgroundGrey = Color(0xff232323);
   static const lightShadow = Color(0xff3D3C3C);

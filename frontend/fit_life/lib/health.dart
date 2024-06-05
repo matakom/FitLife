@@ -1,6 +1,7 @@
 import 'package:health/health.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'steps.dart';
+import 'appData.dart';
 
 class health{
 
@@ -19,8 +20,9 @@ class health{
       HealthDataType.STEPS,
     ];
 
-    await Health().requestAuthorization(types);
-
+    if (!((await Health().hasPermissions(types)) ?? false)) {
+      await Health().requestAuthorization(types);
+    }
     List<StepData> data = <StepData>[];
 
     DateTime today = DateTime.now().subtract(Duration(days: 0));
@@ -54,6 +56,7 @@ class health{
       }
     }
 
+    appData.data = data;
     return data;
   }
 
