@@ -46,7 +46,7 @@ class MainActivity: FlutterFragmentActivity() {
                 }
                 else{
 
-                    val usageStatsManager = this.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+                    val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
                     val calendar = Calendar.getInstance()
                     val endTime = calendar.timeInMillis
 
@@ -63,8 +63,7 @@ class MainActivity: FlutterFragmentActivity() {
                     while(usageStats.hasNextEvent()){
                         val event = UsageEvents.Event()
                         usageStats.getNextEvent(event)
-                        val appName = getAppName(applicationContext, event.packageName)
-                        Log.d("appName", appName)
+                        val appName = getAppName(applicationContext, event.getPackageName())
                         myJson.add(Data(appName, event.eventType, event.timeStamp))
                     }
 
@@ -81,10 +80,10 @@ class MainActivity: FlutterFragmentActivity() {
     private fun getAppName(context: Context, packageName: String): String {
         return try {
             val packageManager = context.packageManager
-            val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
-            packageManager.getApplicationLabel(applicationInfo).toString()
+            val applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            val appLabel = packageManager.getApplicationLabel(applicationInfo).toString()
+            appLabel
         } catch (e: PackageManager.NameNotFoundException) {
-            Log.e("MainActivity", "App name not found for package: $packageName")
             packageName // fallback to package name if the app name is not found
         }
     }

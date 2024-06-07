@@ -42,14 +42,31 @@ class _HomeState extends State<Home> {
 
       int milliSeconds = 0;
       int previousTimeStamp = -1;
+      DateTime previousTimeStampForScreenTime = DateTime(0,0,0,0,0);
 
       appData.dataList.forEach((element) {
         if (element.type == 15 || element.type == 16) {
           if (element.type == 15) {
             previousTimeStamp = element.timeStamp.millisecondsSinceEpoch;
+            previousTimeStampForScreenTime = element.timeStamp;
           } else if (previousTimeStamp != -1) {
-            milliSeconds +=
-                element.timeStamp.millisecondsSinceEpoch - previousTimeStamp;
+            int iterations = 0;
+            while (previousTimeStampForScreenTime.hour != DateTime.fromMillisecondsSinceEpoch(element.timeStamp.millisecondsSinceEpoch).hour){
+              print("hour: ${DateTime.fromMillisecondsSinceEpoch(element.timeStamp.millisecondsSinceEpoch).hour}");
+              print("previous: ${previousTimeStampForScreenTime.hour}");
+              if(iterations != 0){
+                appData.screenTimeDetailed[previousTimeStampForScreenTime.hour] = 3600000;
+              }
+              else{
+                int leftMinutesInHour = 60 - previousTimeStampForScreenTime.minute;
+                appData.screenTimeDetailed[previousTimeStampForScreenTime.hour] = Duration(minutes: leftMinutesInHour).inMilliseconds;
+              }
+              iterations++;
+              previousTimeStampForScreenTime = previousTimeStampForScreenTime.add(const Duration(hours: 1));
+            }
+            appData.screenTimeDetailed[element.timeStamp.hour] += element.timeStamp.millisecondsSinceEpoch - previousTimeStamp;
+
+            milliSeconds += element.timeStamp.millisecondsSinceEpoch - previousTimeStamp;
             previousTimeStamp = -1;
           }
         }
@@ -63,6 +80,8 @@ class _HomeState extends State<Home> {
       setState(() {
         interactive = Duration(milliseconds: milliSeconds);
       });
+
+      appData.screenTime = 'Screen time: ${interactive.inHours.toString().padLeft(2, '0')}:${interactive.inMinutes.remainder(60).toString().padLeft(2, '0')}:${interactive.inSeconds.remainder(60).toString().padLeft(2, '0')}';
 
       print("-------------------------");
       print("Interactive: ${interactive.toString()}");
@@ -93,6 +112,10 @@ class _HomeState extends State<Home> {
       mapKeys.sort((a, b) => timeMap[b]!.compareTo(timeMap[a]!));
       appData.sortedTimeMap = LinkedHashMap();
       mapKeys.forEach((key) => appData.sortedTimeMap[key] = timeMap[key]);
+
+      appData.filteredEvents = filterEvents(appData.dataList);
+
+      appData.sortedTimeMapWidgets = [];
 
       for (var key in appData.sortedTimeMap.keys) {
         appData.sortedTimeMapWidgets.add(
@@ -136,7 +159,7 @@ class _HomeState extends State<Home> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
                   child: Text(
-                    'Screen time: ${interactive.inHours.toString().padLeft(2, '0')}:${interactive.inMinutes.remainder(60).toString().padLeft(2, '0')}:${interactive.inSeconds.remainder(60).toString().padLeft(2, '0')}',
+                    appData.screenTime,
                     style: const TextStyle(color: colors.white, fontSize: 30),
                   ),
                 ),

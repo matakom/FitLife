@@ -30,6 +30,36 @@ class Data {
   }
 }
 
+class DataV2 {
+  final String name;
+  final String type;
+  final DateTime timeStamp;
+
+  DataV2({
+    required this.name,
+    required this.type,
+    required this.timeStamp,
+  });
+
+  // Factory method to create a Data object from JSON
+  factory DataV2.fromJson(Map<String, dynamic> json) {
+    return DataV2(
+      name: json['name'],
+      type: json['type'],
+      timeStamp: DateTime.fromMillisecondsSinceEpoch(json['timeStamp'])
+    );
+  }
+
+  // Method to convert a Data object to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'type': type,
+      'timeStamp': timeStamp.millisecondsSinceEpoch,
+    };
+  }
+}
+
 class AppEvent {
   final String type;
   final DateTime time;
@@ -42,8 +72,14 @@ Map<String, List<AppEvent>> parseEvents(List<Data> events) {
   Map<String, List<AppEvent>> appEvents = {};
 
   for (var event in events) {
+    
+    if(event.name.contains('android')){
+      continue;
+    }
+    
     // Create or get the list of events for the app
     appEvents[event.name] ??= [];
+
 
     // Add the event type and its time to the list
     appEvents[event.name]!.add(AppEvent(
@@ -53,6 +89,20 @@ Map<String, List<AppEvent>> parseEvents(List<Data> events) {
   }
 
   return appEvents;
+}
+
+List<DataV2> filterEvents(List<Data> events) {
+  List<DataV2> filteredEvents = [];
+  events.forEach((element) {
+    String type = eventTypeToString(element.type, element.name);
+    if(element.name.contains('android')){
+      
+    }
+    else if(type == 'ACTIVITY_RESUMED' || type == 'ACTIVITY_PAUSED' || type == 'ACTIVITY_STOPPED'){
+      filteredEvents.add(DataV2(name: element.name, type: type, timeStamp: element.timeStamp));
+    }
+  });
+  return filteredEvents;
 }
 
 String eventTypeToString(int eventType, String eventName) {
@@ -90,7 +140,7 @@ String eventTypeToString(int eventType, String eventName) {
     case 27:
       return 'DEVICE_STARTUP';
     default:
-      print('Unknown event type: $eventType for event: $eventName');
+      //print('Unknown event type: $eventType for event: $eventName');
       return 'UNKNOWN_EVENT_TYPE';
   }
 }
