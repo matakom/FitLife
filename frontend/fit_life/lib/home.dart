@@ -52,17 +52,17 @@ class _HomeState extends State<Home> {
           } else if (previousTimeStamp != -1) {
             int iterations = 0;
             while (previousTimeStampForScreenTime.hour != DateTime.fromMillisecondsSinceEpoch(element.timeStamp.millisecondsSinceEpoch).hour){
+              if(previousTimeStampForScreenTime.hour == 17){
+                print('object');
+              }
               print("hour: ${DateTime.fromMillisecondsSinceEpoch(element.timeStamp.millisecondsSinceEpoch).hour}");
               print("previous: ${previousTimeStampForScreenTime.hour}");
-              if(iterations != 0){
-                appData.screenTimeDetailed[previousTimeStampForScreenTime.hour] = 3600000;
-              }
-              else{
-                int leftMinutesInHour = 60 - previousTimeStampForScreenTime.minute;
-                appData.screenTimeDetailed[previousTimeStampForScreenTime.hour] = Duration(minutes: leftMinutesInHour).inMilliseconds;
-              }
+
+              int leftMinutesInHour = 60 - previousTimeStampForScreenTime.minute - Duration(milliseconds: appData.screenTimeDetailed[previousTimeStampForScreenTime.hour]).inMinutes;
+              appData.screenTimeDetailed[previousTimeStampForScreenTime.hour] = Duration(minutes: leftMinutesInHour).inMilliseconds;
               iterations++;
               previousTimeStampForScreenTime = previousTimeStampForScreenTime.add(const Duration(hours: 1));
+              previousTimeStamp += Duration(minutes: leftMinutesInHour).inMilliseconds;
             }
             appData.screenTimeDetailed[element.timeStamp.hour] += element.timeStamp.millisecondsSinceEpoch - previousTimeStamp;
 
