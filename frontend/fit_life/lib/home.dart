@@ -78,6 +78,9 @@ class _HomeState extends State<Home> {
           }
         }
       });
+      setState(() {
+        appData.screenTimeDetailed[previousTimeStampForScreenTime.hour].time += DateTime.now().millisecondsSinceEpoch - previousTimeStamp;
+      });
 
       if (previousTimeStamp != -1) {
         milliSeconds +=
@@ -458,10 +461,13 @@ class _GraphScreenTimeState extends State<GraphScreenTime> {
   }
 
   Future<List<ScreenTime>> fetchScreenTimeDetailed() async {
-    // Simulate a network call or async operation
-    await Future.delayed(Duration(seconds: 2));
+    List<ScreenTime> screenTimeDetailed = appData.screenTimeDetailed;
+
+    while(screenTimeDetailed.length < 24){
+      await Future.delayed(Duration(milliseconds: 50));
+    }
     // Replace the following line with your actual data fetching logic
-    return appData.screenTimeDetailed;
+    return screenTimeDetailed;
   }
 
   @override
