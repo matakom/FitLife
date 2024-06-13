@@ -12,4 +12,10 @@ class appData{
   static List<Widget> sortedTimeMapWidgets = <Widget>[];
   static String screenTime = '';
   static List<ScreenTime> screenTimeDetailed = <ScreenTime>[];
+  static List<Widget> tips = <Widget>[];
+  static Duration interactive = const Duration();
+  static ValueNotifier<int> totalSteps = ValueNotifier<int>(0);
+  static void updateTotalSteps(int newSteps){
+    totalSteps.value = newSteps;
+  }
 }

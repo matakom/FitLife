@@ -57,6 +57,14 @@ class health{
     }
 
     appData.data = data;
+
+    int totalSteps = 0;
+    appData.data.forEach((element) {
+      totalSteps += element.steps;
+    });
+
+    appData.updateTotalSteps(totalSteps);
+
     return data;
   }
 

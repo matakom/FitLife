@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'home.dart';
 import 'package:flutter/services.dart';
+import 'package:fit_life/tips.dart';
 
 
 
@@ -126,14 +127,6 @@ class _NavigationState extends State<Navigation> {
   }
 }
 
-class Tips extends StatelessWidget {
-  const Tips({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
 
 class Settings extends StatelessWidget {
   final Function(bool) updateLoginStatus;
