@@ -85,10 +85,20 @@ class _HomeState extends State<Home> {
           }
         }
       });
+      int leftMinutesInHour = 60 - previousTimeStampForScreenTime.minute;
+      int minutesToAdd = ((DateTime.now().millisecondsSinceEpoch - previousTimeStamp) / 1000 / 60).round();
+      int hour = previousTimeStampForScreenTime.hour;
+      while(leftMinutesInHour < minutesToAdd){
+        setState(() {
+          appData.screenTimeDetailed[previousTimeStampForScreenTime.hour].time += leftMinutesInHour * 60 * 1000;
+        });
+        minutesToAdd -= leftMinutesInHour;
+        leftMinutesInHour = 60;
+        hour++;
+      }
       setState(() {
-        appData.screenTimeDetailed[previousTimeStampForScreenTime.hour].time +=
-            DateTime.now().millisecondsSinceEpoch - previousTimeStamp;
-      });
+          appData.screenTimeDetailed[previousTimeStampForScreenTime.hour].time += minutesToAdd * 60 * 1000;
+        });
 
       if (previousTimeStamp != -1) {
         milliSeconds +=
@@ -173,26 +183,20 @@ class _HomeState extends State<Home> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    'Steps',
-                    style: TextStyle(color: colors.white, fontSize: 30),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0, top: 16.0),
+                  child: ValueListenableBuilder<int>(
+                    valueListenable: appData.totalSteps,
+                    builder: (context, value, child) {
+                      return Text(
+                        "Today's steps: ${appData.totalSteps.value.toString()}",
+                        style:
+                            const TextStyle(color: colors.white, fontSize: 30),
+                      );
+                    },
                   ),
                 ),
                 const Graph(),
-                Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
-                    child: ValueListenableBuilder<int>(
-                      valueListenable: appData.totalSteps,
-                      builder: (context, value, child) {
-                        return Text(
-                          "Today's steps: ${appData.totalSteps.value.toString()}",
-                          style: const TextStyle(
-                              color: colors.white, fontSize: 30),
-                        );
-                      },
-                    )),
                 lineDivider(),
                 const Padding(
                   padding: EdgeInsets.only(top: 8.0),
