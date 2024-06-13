@@ -11,5 +11,5 @@ class appData{
   static LinkedHashMap sortedTimeMap = LinkedHashMap();
   static List<Widget> sortedTimeMapWidgets = <Widget>[];
   static String screenTime = '';
-  static List<int> screenTimeDetailed = List.filled(24, 0, growable: false);
+  static List<ScreenTime> screenTimeDetailed = <ScreenTime>[];
 }

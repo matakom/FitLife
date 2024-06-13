@@ -14,7 +14,6 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 const methodChannel = MethodChannel('kotlinChannel');
 health.health healthFactory = health.health();
 
-
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -31,7 +30,7 @@ class _HomeState extends State<Home> {
     getUsageStats();
   }
 
-  Future<void> getUsageStats() async {
+  Future<List<ScreenTime>> getUsageStats() async {
     try {
       List<dynamic> jsonList =
           jsonDecode(await methodChannel.invokeMethod('getUsageStats'));
@@ -42,32 +41,40 @@ class _HomeState extends State<Home> {
 
       int milliSeconds = 0;
       int previousTimeStamp = -1;
-      DateTime previousTimeStampForScreenTime = DateTime(0,0,0,0,0);
+      int previousTimeStamp2 = -1;
+      DateTime previousTimeStampForScreenTime = DateTime(0, 0, 0, 0, 0);
+
+      for(int i = 0; i < 24; i++){
+        if(appData.screenTimeDetailed.length < 24){
+          appData.screenTimeDetailed.add(ScreenTime(hour: i, time: 0));
+        }
+        appData.screenTimeDetailed[i].hour = i;
+        appData.screenTimeDetailed[i].time = 0;
+      }
 
       appData.dataList.forEach((element) {
         if (element.type == 15 || element.type == 16) {
           if (element.type == 15) {
             previousTimeStamp = element.timeStamp.millisecondsSinceEpoch;
+            previousTimeStamp2 = element.timeStamp.millisecondsSinceEpoch;
             previousTimeStampForScreenTime = element.timeStamp;
           } else if (previousTimeStamp != -1) {
-            int iterations = 0;
-            while (previousTimeStampForScreenTime.hour != DateTime.fromMillisecondsSinceEpoch(element.timeStamp.millisecondsSinceEpoch).hour){
-              if(previousTimeStampForScreenTime.hour == 17){
-                print('object');
-              }
-              print("hour: ${DateTime.fromMillisecondsSinceEpoch(element.timeStamp.millisecondsSinceEpoch).hour}");
-              print("previous: ${previousTimeStampForScreenTime.hour}");
-
-              int leftMinutesInHour = 60 - previousTimeStampForScreenTime.minute - Duration(milliseconds: appData.screenTimeDetailed[previousTimeStampForScreenTime.hour]).inMinutes;
-              appData.screenTimeDetailed[previousTimeStampForScreenTime.hour] = Duration(minutes: leftMinutesInHour).inMilliseconds;
-              iterations++;
-              previousTimeStampForScreenTime = previousTimeStampForScreenTime.add(const Duration(hours: 1));
+            while (previousTimeStampForScreenTime.hour != DateTime.fromMillisecondsSinceEpoch(element.timeStamp.millisecondsSinceEpoch).hour) {
+              int leftMinutesInHour = 60 - previousTimeStampForScreenTime.minute;
+              setState(() {
+                appData.screenTimeDetailed[previousTimeStampForScreenTime.hour].time += Duration(minutes: leftMinutesInHour).inMilliseconds;
+              });
+              previousTimeStampForScreenTime = previousTimeStampForScreenTime.add(Duration(minutes: leftMinutesInHour));
               previousTimeStamp += Duration(minutes: leftMinutesInHour).inMilliseconds;
             }
-            appData.screenTimeDetailed[element.timeStamp.hour] += element.timeStamp.millisecondsSinceEpoch - previousTimeStamp;
+            setState(() {
+              appData.screenTimeDetailed[element.timeStamp.hour].time += element.timeStamp.millisecondsSinceEpoch - previousTimeStamp;
+            });
 
-            milliSeconds += element.timeStamp.millisecondsSinceEpoch - previousTimeStamp;
+            milliSeconds +=
+                element.timeStamp.millisecondsSinceEpoch - previousTimeStamp2;
             previousTimeStamp = -1;
+            previousTimeStamp2 = -1;
           }
         }
       });
@@ -81,7 +88,8 @@ class _HomeState extends State<Home> {
         interactive = Duration(milliseconds: milliSeconds);
       });
 
-      appData.screenTime = 'Screen time: ${interactive.inHours.toString().padLeft(2, '0')}:${interactive.inMinutes.remainder(60).toString().padLeft(2, '0')}:${interactive.inSeconds.remainder(60).toString().padLeft(2, '0')}';
+      appData.screenTime =
+          'Screen time: ${interactive.inHours.toString().padLeft(2, '0')}:${interactive.inMinutes.remainder(60).toString().padLeft(2, '0')}:${interactive.inSeconds.remainder(60).toString().padLeft(2, '0')}';
 
       print("-------------------------");
       print("Interactive: ${interactive.toString()}");
@@ -96,9 +104,17 @@ class _HomeState extends State<Home> {
         value.forEach((element) {
           if (element.type == "ACTIVITY_RESUMED" && start == -1) {
             start = element.time.millisecondsSinceEpoch;
-          } else if ((element.type == "ACTIVITY_STOPPED") && start != -1) {
-            timeMap[key] = element.time.millisecondsSinceEpoch - start + (timeMap[key] ?? 0);
-            start = -1;
+          } else if ((element.type == "ACTIVITY_PAUSED") && start != -1) {
+            if(element.time.millisecondsSinceEpoch - start > 0){
+              timeMap[key] = element.time.millisecondsSinceEpoch - start + (timeMap[key] ?? 0);
+              start = -1;
+            }
+          }
+          else if(element.type == "ACTIVITY_STOPPED" && start != -1){
+            if(element.time.millisecondsSinceEpoch - start > 1500){
+              timeMap[key] = element.time.millisecondsSinceEpoch - start + (timeMap[key] ?? 0);
+              start = -1;
+            }
           }
         });
         if (start != -1) {
@@ -108,12 +124,85 @@ class _HomeState extends State<Home> {
         }
       });
 
+
+      String? activeApp;
+      DateTime? appFocusStartTime;
+
+      appData.filteredEvents = filterEvents(appData.dataList);
+
+
+      
+      // int index = 0;
+
+      // for(int i = 0; i < appData.dataList.length; i++){
+      //   final element = appData.dataList[i];
+
+      //   if(element.type == 15){
+      //     while(appData.filteredEvents[index].type != "ACTIVITY_RESUMED" && appData.filteredEvents[index].timeStamp.millisecondsSinceEpoch > element.timeStamp.millisecondsSinceEpoch){
+      //       index++;
+      //     }
+      //     index--;
+      //     print("New active app: ${activeApp} at index: $index");
+      //   }
+      //   else if(element.type == 16){
+      //     while(appData.filteredEvents[index].timeStamp.millisecondsSinceEpoch < element.timeStamp.millisecondsSinceEpoch){
+      //       if(appData.filteredEvents[index].type == "ACTIVITY_RESUMED"){
+      //         activeApp = appData.filteredEvents[index].name;
+      //         appFocusStartTime = appData.filteredEvents[index].timeStamp;
+      //         timeMap[activeApp ?? "NOOOOO"] = appData.filteredEvents[index].timeStamp.millisecondsSinceEpoch - appFocusStartTime!.millisecondsSinceEpoch + (timeMap[activeApp ?? "NOOOOO"] ?? 0);
+      //         print("Added data to $activeApp: ${appData.filteredEvents[index].timeStamp.millisecondsSinceEpoch - appFocusStartTime!.millisecondsSinceEpoch + (timeMap[activeApp ?? "NOOOOO"] ?? 0)}");
+      //       }
+      //       index++;
+      //     }
+      //     timeMap[activeApp ?? "NOOOOO"] = appData.filteredEvents[index].timeStamp.millisecondsSinceEpoch - element.timeStamp.millisecondsSinceEpoch + (timeMap[activeApp ?? "NOOOOO"] ?? 0);
+      //     activeApp = null;
+      //     appFocusStartTime = null;
+
+
+      //   }
+      // }
+      
+
+
+      // appData.filteredEvents.forEach((element) {
+      //   if(!timeMap.containsKey(element.name)){
+      //     timeMap[element.name] = 0;
+      //   }
+
+      //   if (element.type == "ACTIVITY_RESUMED") {
+      //     print("Resumed: ${element.name}");
+      //     activeApp = element.name;
+      //     appFocusStartTime = element.timeStamp;
+      //   }
+      //   else if ((element.type == "ACTIVITY_PAUSED")) {
+      //     print("Paused: ${element.name}");
+      //     if (timeMap[element.name] != null && appFocusStartTime != null) {
+      //       timeMap[element.name] = (element.timeStamp.millisecond - appFocusStartTime!.millisecond) + (timeMap[element.name] ?? 0);
+      //     }
+      //     activeApp = null;
+      //     appFocusStartTime = null;
+      //   }
+      //   else if(element.type == "ACTIVITY_STOPPED" ){
+      //     print("Stopped: ${element.name}");
+      //     if (timeMap[element.name] != null && appFocusStartTime != null) {
+      //       timeMap[element.name] = (element.timeStamp.millisecond - appFocusStartTime!.millisecond) + (timeMap[element.name] ?? 0);
+      //     }
+      //     activeApp = null;
+      //     appFocusStartTime = null;
+      //   }
+
+      // });
+      // if (activeApp != null) {
+      //   if (timeMap[activeApp] != null && appFocusStartTime != null) {
+      //       timeMap[activeApp ?? "NOOOO"] = (DateTime.now().millisecond - appFocusStartTime!.millisecond) + (timeMap[activeApp] ?? 0);
+      //     }
+      // }
+
       List mapKeys = timeMap.keys.toList(growable: false);
       mapKeys.sort((a, b) => timeMap[b]!.compareTo(timeMap[a]!));
       appData.sortedTimeMap = LinkedHashMap();
       mapKeys.forEach((key) => appData.sortedTimeMap[key] = timeMap[key]);
 
-      appData.filteredEvents = filterEvents(appData.dataList);
 
       appData.sortedTimeMapWidgets = [];
 
@@ -121,16 +210,12 @@ class _HomeState extends State<Home> {
         appData.sortedTimeMapWidgets.add(
           ScreenTimeFrame(
               name: key,
-              time: '${Duration(milliseconds: appData.sortedTimeMap[key])
-                      .inHours
-                      .toString()
-                      .padLeft(2, '0')}:${(Duration(milliseconds: appData.sortedTimeMap[key]).inMinutes % 60)
-                      .toString()
-                      .padLeft(2, '0')}:${(Duration(milliseconds: appData.sortedTimeMap[key]).inSeconds % 60)
-                      .toString()
-                      .padLeft(2, '0')}'),
+              time:
+                  '${Duration(milliseconds: appData.sortedTimeMap[key]).inHours.toString().padLeft(2, '0')}:${(Duration(milliseconds: appData.sortedTimeMap[key]).inMinutes % 60).toString().padLeft(2, '0')}:${(Duration(milliseconds: appData.sortedTimeMap[key]).inSeconds % 60).toString().padLeft(2, '0')}'),
         );
       }
+
+      return appData.screenTimeDetailed;
     } on PlatformException catch (e) {
       print("Failed to get usage stats: '$e'.");
       rethrow;
@@ -155,6 +240,15 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 const Graph(),
+                lineDivider(),
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Detailed screen time',
+                    style: TextStyle(color: colors.white, fontSize: 30),
+                  ),
+                ),
+                const GraphScreenTime(),
                 lineDivider(),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
@@ -254,10 +348,11 @@ class _GraphState extends State<Graph> {
       future: _dataFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          if(appData.data.isEmpty){
+          if (appData.data.isEmpty) {
             return Padding(
               padding: const EdgeInsets.all(100.0),
-              child: LoadingAnimationWidget.inkDrop(color: colors.orange, size: 50),
+              child: LoadingAnimationWidget.inkDrop(
+                  color: colors.orange, size: 50),
             );
           }
           return Padding(
@@ -341,6 +436,202 @@ class _GraphState extends State<Graph> {
                 ]),
           );
         }
+      },
+    );
+  }
+}
+
+class GraphScreenTime extends StatefulWidget {
+  const GraphScreenTime({super.key});
+
+  @override
+  State<GraphScreenTime> createState() => _GraphScreenTimeState();
+}
+
+class _GraphScreenTimeState extends State<GraphScreenTime> {
+  late Future<List<ScreenTime>> _screenTimeFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _screenTimeFuture = fetchScreenTimeDetailed();
+  }
+
+  Future<List<ScreenTime>> fetchScreenTimeDetailed() async {
+    // Simulate a network call or async operation
+    await Future.delayed(Duration(seconds: 2));
+    // Replace the following line with your actual data fetching logic
+    return appData.screenTimeDetailed;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<ScreenTime>>(
+      future: _screenTimeFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          if(appData.screenTimeDetailed.any((element) => element.time != 0)){
+            
+
+
+
+            final screenTimeDetailed = appData.screenTimeDetailed;
+          int i = 0;
+          for(i = 0; i < 24; i++){
+            if(screenTimeDetailed[i].time != 0){
+              i--;
+              break;
+            }
+          }
+          for (int j = 0; j < i; j++){
+            screenTimeDetailed.removeAt(0);
+          }
+
+          i = screenTimeDetailed.length - 1;
+          for(; i > 0; i--){
+            if(screenTimeDetailed[i].time != 0){
+              i++;
+              break;
+            }
+          }
+          for (int j = screenTimeDetailed.length - 1; j > i; j--){
+            screenTimeDetailed.removeAt(screenTimeDetailed.length - 1);
+          }
+
+
+          List<int> screenTimes = screenTimeDetailed.map((st) => st.time).toList();
+          for(i = 0; i < screenTimes.length; i++){
+            screenTimes[i] = (screenTimes[i] / 1000 / 60).round();
+          }
+          final List<int> times = screenTimeDetailed.map((st) => st.hour).toList();
+          final List<String> formattedTimes = times.map((hour) {
+            final dateTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, hour);
+            return DateFormat.Hm().format(dateTime);
+          }).toList();
+
+          return Padding(
+            padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
+            child: SfCartesianChart(
+                primaryXAxis: const CategoryAxis(
+                  labelStyle: TextStyle(color: colors.white),
+                ),
+                primaryYAxis: const NumericAxis(
+                  labelStyle: TextStyle(color: colors.white),
+                  majorGridLines: MajorGridLines(
+                    width: 1,
+                  ),
+                  minorGridLines:
+                      MinorGridLines(width: 1, color: colors.whiteSmallOpacity),
+                  minorTicksPerInterval: 1,
+                ),
+                legend: const Legend(isVisible: false),
+                tooltipBehavior: TooltipBehavior(enable: true),
+                palette: const [
+                  colors.orange
+                ],
+                series: <CartesianSeries<int, String>>[
+                  ColumnSeries<int, String>(
+                      dataSource: List<int>.generate(screenTimes.length, (index) => index),
+                      xValueMapper: (int index, _) => formattedTimes[index],
+                      yValueMapper: (int index, _) => screenTimes[index],
+                      animationDuration: 0,
+                      name: 'Minutes',
+                      dataLabelSettings: const DataLabelSettings(
+                        isVisible: true,
+                        labelAlignment: ChartDataLabelAlignment.top,
+                        offset: Offset(0, 20),
+                        color: colors.lightShadow,
+                        showZeroValue: false,
+                        alignment: ChartAlignment.far,
+                      )),
+                ]),
+          );
+
+
+
+
+          }
+          return Padding(
+            padding: const EdgeInsets.all(100.0),
+            child:
+                LoadingAnimationWidget.inkDrop(color: colors.orange, size: 50),
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (snapshot.hasData) {
+          final screenTimeDetailed = snapshot.data!;
+          int i = 0;
+          for(i = 0; i < 24; i++){
+            if(screenTimeDetailed[i].time != 0){
+              i--;
+              break;
+            }
+          }
+          for (int j = 0; j < i; j++){
+            screenTimeDetailed.removeAt(0);
+          }
+
+          i = screenTimeDetailed.length - 1;
+          for(; i > 0; i--){
+            if(screenTimeDetailed[i].time != 0){
+              i++;
+              break;
+            }
+          }
+          for (int j = screenTimeDetailed.length - 1; j > i; j--){
+            screenTimeDetailed.removeAt(screenTimeDetailed.length - 1);
+          }
+
+
+          List<int> screenTimes = screenTimeDetailed.map((st) => st.time).toList();
+          for(i = 0; i < screenTimes.length; i++){
+            screenTimes[i] = (screenTimes[i] / 1000 / 60).round();
+          }
+          final List<int> times = screenTimeDetailed.map((st) => st.hour).toList();
+          final List<String> formattedTimes = times.map((hour) {
+            final dateTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, hour);
+            return DateFormat.Hm().format(dateTime);
+          }).toList();
+
+          return Padding(
+            padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
+            child: SfCartesianChart(
+                primaryXAxis: const CategoryAxis(
+                  labelStyle: TextStyle(color: colors.white),
+                ),
+                primaryYAxis: const NumericAxis(
+                  labelStyle: TextStyle(color: colors.white),
+                  majorGridLines: MajorGridLines(
+                    width: 1,
+                  ),
+                  minorGridLines:
+                      MinorGridLines(width: 1, color: colors.whiteSmallOpacity),
+                  minorTicksPerInterval: 1,
+                ),
+                legend: const Legend(isVisible: false),
+                tooltipBehavior: TooltipBehavior(enable: true),
+                palette: const [
+                  colors.orange
+                ],
+                series: <CartesianSeries<int, String>>[
+                  ColumnSeries<int, String>(
+                      dataSource: List<int>.generate(screenTimes.length, (index) => index),
+                      xValueMapper: (int index, _) => formattedTimes[index],
+                      yValueMapper: (int index, _) => screenTimes[index],
+                      animationDuration: 0,
+                      name: 'Minutes',
+                      dataLabelSettings: const DataLabelSettings(
+                        isVisible: true,
+                        labelAlignment: ChartDataLabelAlignment.top,
+                        offset: Offset(0, 20),
+                        color: colors.lightShadow,
+                        showZeroValue: false,
+                        alignment: ChartAlignment.far,
+                      )),
+                ]),
+          );
+        }
+        return Container(); // Empty container in case of none of the above conditions match
       },
     );
   }

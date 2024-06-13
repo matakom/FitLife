@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class Data {
   final String name;
   final int type;
@@ -65,6 +63,13 @@ class AppEvent {
   final DateTime time;
 
   AppEvent({required this.type, required this.time});
+}
+
+class ScreenTime{
+  int hour;
+  int time;
+
+  ScreenTime({required this.hour, required this.time});
 }
 
 Map<String, List<AppEvent>> parseEvents(List<Data> events) {
