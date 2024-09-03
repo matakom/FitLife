@@ -15,7 +15,7 @@ class _TipsState extends State<Tips> {
     appData.tips = [];
 
     // Less screen time
-    if(appData.interactive > Duration(hours: 2)){
+    if(appData.interactive > const Duration(hours: 2)){
       appData.tips.add(
         tipCard(name: tipList[0]['name'] ?? 'Unknown', description: tipList[0]['description'] ?? 'Unknown'),
       );
@@ -56,6 +56,24 @@ class _TipsState extends State<Tips> {
     if(!appData.data.any((element) => element.steps > 500 && element.time.millisecondsSinceEpoch < now.subtract(Duration(hours: now.hour, minutes: now.minute)).add(const Duration(hours: 10)).millisecondsSinceEpoch)){
       appData.tips.add(
         tipCard(name: tipList[4]['name'] ?? 'Unknown', description: tipList[4]['description'] ?? 'Unknown'),
+      );
+    }
+
+    // Active hours
+    int numberOfActiveHours = 0;
+    appData.data.where((element) => element.steps > 1000).forEach((element) {
+      numberOfActiveHours++;
+    });
+    if(numberOfActiveHours < 6){
+      appData.tips.add(
+        tipCard(name: tipList[5]['name'] ?? 'Unknown', description: tipList[5]['description'] ?? 'Unknown'),
+      );
+    }
+    
+    // No tips
+    if(appData.tips.isEmpty){
+      appData.tips.add(
+        tipCard(name: tipList[6]['name'] ?? 'Unknown', description: tipList[6]['description'] ?? 'Unknown'),
       );
     }
 
@@ -147,6 +165,14 @@ const tipList = [
   {
     "name": "Get sunlight early",
     "description": "You should go for a walk at the morning to get sunlight. It helps to wake you up."
+  },
+  {
+    "name": "Active hours",
+    "description": "You should walk 1000 steps at least 6 hours every day."
+  },
+  {
+    "name": "You are good",
+    "description": "We have no tips for you right now. Check later!"
   }
 
 

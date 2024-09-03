@@ -86,19 +86,25 @@ class _HomeState extends State<Home> {
         }
       });
       int leftMinutesInHour = 60 - previousTimeStampForScreenTime.minute;
-      int minutesToAdd = ((DateTime.now().millisecondsSinceEpoch - previousTimeStamp) / 1000 / 60).round();
+      int minutesToAdd =
+          ((DateTime.now().millisecondsSinceEpoch - previousTimeStamp) /
+                  1000 /
+                  60)
+              .round();
       int hour = previousTimeStampForScreenTime.hour;
-      while(leftMinutesInHour < minutesToAdd){
+      while (leftMinutesInHour < minutesToAdd) {
         setState(() {
-          appData.screenTimeDetailed[previousTimeStampForScreenTime.hour].time += leftMinutesInHour * 60 * 1000;
+          appData.screenTimeDetailed[previousTimeStampForScreenTime.hour]
+              .time += leftMinutesInHour * 60 * 1000;
         });
         minutesToAdd -= leftMinutesInHour;
         leftMinutesInHour = 60;
         hour++;
       }
       setState(() {
-          appData.screenTimeDetailed[previousTimeStampForScreenTime.hour].time += minutesToAdd * 60 * 1000;
-        });
+        appData.screenTimeDetailed[previousTimeStampForScreenTime.hour].time +=
+            minutesToAdd * 60 * 1000;
+      });
 
       if (previousTimeStamp != -1) {
         milliSeconds +=
@@ -315,40 +321,40 @@ class _GraphState extends State<Graph> {
           return Padding(
             padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
             child: SfCartesianChart(
-                primaryXAxis: const CategoryAxis(
-                  labelStyle: TextStyle(color: colors.white),
+              primaryXAxis: const CategoryAxis(
+                labelStyle: TextStyle(color: colors.white),
+              ),
+              primaryYAxis: const NumericAxis(
+                labelStyle: TextStyle(color: colors.white),
+                majorGridLines: MajorGridLines(
+                  width: 1,
                 ),
-                primaryYAxis: const NumericAxis(
-                  labelStyle: TextStyle(color: colors.white),
-                  majorGridLines: MajorGridLines(
-                    width: 1,
+                minorGridLines:
+                    MinorGridLines(width: 1, color: colors.whiteSmallOpacity),
+                minorTicksPerInterval: 1,
+              ),
+              legend: const Legend(isVisible: false),
+              tooltipBehavior: TooltipBehavior(enable: true),
+              palette: const [colors.orange],
+              series: <CartesianSeries<StepData, String>>[
+                ColumnSeries<StepData, String>(
+                  dataSource: appData.data,
+                  xValueMapper: (StepData steps, _) =>
+                      DateFormat.Hm().format(steps.time).toString(),
+                  yValueMapper: (StepData steps, _) => steps.steps,
+                  animationDuration: 0,
+                  name: 'Steps',
+                  dataLabelSettings: const DataLabelSettings(
+                    isVisible: true,
+                    labelAlignment: ChartDataLabelAlignment.top,
+                    offset: Offset(0, 20),
+                    color: colors.lightShadow,
+                    showZeroValue: false,
+                    alignment: ChartAlignment.far,
                   ),
-                  minorGridLines:
-                      MinorGridLines(width: 1, color: colors.whiteSmallOpacity),
-                  minorTicksPerInterval: 1,
                 ),
-                legend: const Legend(isVisible: false),
-                tooltipBehavior: TooltipBehavior(enable: true),
-                palette: const [
-                  colors.orange
-                ],
-                series: <CartesianSeries<StepData, String>>[
-                  ColumnSeries<StepData, String>(
-                      dataSource: appData.data,
-                      xValueMapper: (StepData steps, _) =>
-                          DateFormat.Hm().format(steps.time).toString(),
-                      yValueMapper: (StepData steps, _) => steps.steps,
-                      animationDuration: 0,
-                      name: 'Steps',
-                      dataLabelSettings: const DataLabelSettings(
-                        isVisible: true,
-                        labelAlignment: ChartDataLabelAlignment.top,
-                        offset: Offset(0, 20),
-                        color: colors.lightShadow,
-                        showZeroValue: false,
-                        alignment: ChartAlignment.far,
-                      )),
-                ]),
+              ],
+            ),
           );
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
@@ -357,40 +363,40 @@ class _GraphState extends State<Graph> {
           return Padding(
             padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
             child: SfCartesianChart(
-                primaryXAxis: const CategoryAxis(
-                  labelStyle: TextStyle(color: colors.white),
+              primaryXAxis: const CategoryAxis(
+                labelStyle: TextStyle(color: colors.white),
+              ),
+              primaryYAxis: const NumericAxis(
+                labelStyle: TextStyle(color: colors.white),
+                majorGridLines: MajorGridLines(
+                  width: 1,
                 ),
-                primaryYAxis: const NumericAxis(
-                  labelStyle: TextStyle(color: colors.white),
-                  majorGridLines: MajorGridLines(
-                    width: 1,
+                minorGridLines:
+                    MinorGridLines(width: 1, color: colors.whiteSmallOpacity),
+                minorTicksPerInterval: 1,
+              ),
+              legend: const Legend(isVisible: false),
+              tooltipBehavior: TooltipBehavior(enable: true),
+              palette: const [colors.orange],
+              series: <CartesianSeries<StepData, String>>[
+                ColumnSeries<StepData, String>(
+                  dataSource: _data,
+                  xValueMapper: (StepData steps, _) =>
+                      DateFormat.Hm().format(steps.time).toString(),
+                  yValueMapper: (StepData steps, _) => steps.steps,
+                  animationDuration: 0,
+                  name: 'Steps',
+                  dataLabelSettings: const DataLabelSettings(
+                    isVisible: true,
+                    labelAlignment: ChartDataLabelAlignment.top,
+                    offset: Offset(0, 20),
+                    color: colors.lightShadow,
+                    showZeroValue: false,
+                    alignment: ChartAlignment.far,
                   ),
-                  minorGridLines:
-                      MinorGridLines(width: 1, color: colors.whiteSmallOpacity),
-                  minorTicksPerInterval: 1,
                 ),
-                legend: const Legend(isVisible: false),
-                tooltipBehavior: TooltipBehavior(enable: true),
-                palette: const [
-                  colors.orange
-                ],
-                series: <CartesianSeries<StepData, String>>[
-                  ColumnSeries<StepData, String>(
-                      dataSource: _data,
-                      xValueMapper: (StepData steps, _) =>
-                          DateFormat.Hm().format(steps.time).toString(),
-                      yValueMapper: (StepData steps, _) => steps.steps,
-                      animationDuration: 0,
-                      name: 'Steps',
-                      dataLabelSettings: const DataLabelSettings(
-                        isVisible: true,
-                        labelAlignment: ChartDataLabelAlignment.top,
-                        offset: Offset(0, 20),
-                        color: colors.lightShadow,
-                        showZeroValue: false,
-                        alignment: ChartAlignment.far,
-                      )),
-                ]),
+              ],
+            ),
           );
         }
       },
